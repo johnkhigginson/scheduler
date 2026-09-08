@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Scheduler</title>
+<meta name="description" content="Create a date poll, share one link, and find the date everyone can actually make.">
+<link rel="stylesheet" href="/app.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='14'>&#128197;</text></svg>">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="wordmark" href="/">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="4.5" width="18" height="16" rx="2.5"></rect>
+        <path d="M3 9.5h18M8 2.5v4M16 2.5v4M9 14.5l2 2 4-4"></path>
+      </svg>
+      Scheduler
+      <span class="wordmark-sub">Pick a date everyone can actually make</span>
+    </a>
+    <nav class="site-nav">
+      <a href="/">New poll</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap" id="main">
+
+  <div class="hero">
+    <span class="eyebrow">Scheduling, without the group chat</span>
+    <h1>Find the date everyone can actually make.</h1>
+    <p>Add your candidate dates, share one link, and let everyone mark yes or no. No sign up needed, no app to install.</p>
+  </div>
+
+  <div class="card" id="form-card">
+    <h1>New poll</h1>
+    <p class="lede">Add your candidate dates, share the link, let everyone mark yes or no. Maybe is optional.</p>
+
+    <div id="error" class="notice error" hidden></div>
+
+    <div class="field">
+      <label for="title">1. What are you scheduling?</label>
+      <input type="text" id="title" maxlength="120" placeholder="Q3 planning session" autocomplete="off">
+    </div>
+
+    <h2 style="margin-top:24px">2. Which dates might work?</h2>
+
+    <div class="presets">
+      <button type="button" data-preset="days7">Next 7 days</button>
+      <button type="button" data-preset="weekdays">Weekdays next week</button>
+      <button type="button" data-preset="month">Every Friday this month</button>
+    </div>
+
+    <div class="dow-picker">
+      <label id="dow-label">Or repeat certain weekdays across a date range</label>
+      <div class="dows" role="group" aria-labelledby="dow-label">
+        <button type="button" data-dow="1">Mon</button>
+        <button type="button" data-dow="2">Tue</button>
+        <button type="button" data-dow="3">Wed</button>
+        <button type="button" data-dow="4">Thu</button>
+        <button type="button" data-dow="5">Fri</button>
+        <button type="button" data-dow="6">Sat</button>
+        <button type="button" data-dow="0">Sun</button>
+      </div>
+      <div class="dow-range">
+        <label for="range-from">From</label>
+        <input type="date" id="range-from">
+        <label for="range-to">to</label>
+        <input type="date" id="range-to">
+        <button type="button" id="apply-dows">Add those days</button>
+      </div>
+    </div>
+
+    <div class="picker">
+      <div class="cal" role="group" aria-label="Choose dates">
+        <div class="cal-head">
+          <button type="button" id="cal-prev" class="cal-nav" aria-label="Previous month">&lsaquo;</button>
+          <strong id="cal-label" aria-live="polite"></strong>
+          <button type="button" id="cal-next" class="cal-nav" aria-label="Next month">&rsaquo;</button>
+        </div>
+        <div class="cal-dow" aria-hidden="true">
+          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <p class="muted" style="margin:10px 0 0">Click a day to add it. Click it again to remove it. Shift click to add a run of days. Clear all starts over.</p>
+      </div>
+
+      <div class="picked">
+        <div class="picked-head">
+          <strong id="picked-count" aria-live="polite">No days chosen yet</strong>
+          <button type="button" id="clear-dates" class="link">Clear all</button>
+        </div>
+        <div id="options"></div>
+      </div>
+    </div>
+
+    <h2 style="margin-top:26px">3. What times?</h2>
+
+    <div class="times">
+      <label class="check">
+        <input type="radio" name="timemode" value="allday" checked> All day, no specific time
+      </label>
+      <label class="check">
+        <input type="radio" name="timemode" value="window"> Offer time slots on every chosen day
+      </label>
+
+      <div id="window-fields" hidden>
+        <div id="windows"></div>
+        <button type="button" id="add-window">Add a different window for certain days</button>
+        <p class="muted" id="slot-summary" style="margin:10px 0 0" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <label class="check" style="margin-top:20px">
+      <input type="checkbox" id="allow-maybe"> Let people answer "maybe" as well as yes and no
+    </label>
+
+    <details class="more">
+      <summary>Add your name, details or a deadline</summary>
+
+      <div class="field">
+        <label for="organizer">Your name</label>
+        <input type="text" id="organizer" maxlength="60" placeholder="John" autocomplete="name">
+      </div>
+
+      <div class="field">
+        <label for="description">Details</label>
+        <textarea id="description" maxlength="2000" placeholder="Two hours at the office, coffee provided. Bring your notes."></textarea>
+      </div>
+
+      <div class="field" style="margin-bottom:0">
+        <label for="deadline">Voting deadline</label>
+        <input type="datetime-local" id="deadline">
+        <p class="muted" style="margin:6px 0 0">Voting closes on its own at this time. Leave blank to close it yourself.</p>
+      </div>
+    </details>
+
+    <div class="create-bar">
+      <button type="button" id="create" class="primary">Create poll</button>
+      <span class="muted">No account needed. You get a link to share and a private organizer link.</span>
+    </div>
+  </div>
+
+  <div class="card" id="done-card" hidden>
+    <h1>Poll created</h1>
+    <p class="lede">Save the admin link somewhere safe. It is the only way back into the admin controls.</p>
+
+    <div class="field">
+      <label>Share this link</label>
+      <div class="share">
+        <input type="text" id="public-link" readonly>
+        <button type="button" data-copy="public-link">Copy</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Organizer link (keep private)</label>
+      <div class="share">
+        <input type="text" id="admin-link" readonly>
+        <button type="button" data-copy="admin-link">Copy</button>
+      </div>
+      <p class="muted">Anyone with this link can rename, close or delete the poll.</p>
+      <div class="actions" style="margin-top:10px">
+        <button type="button" id="save-links">Download both links</button>
+        <a id="email-links" href="#">Email them to yourself</a>
+      </div>
+    </div>
+
+    <div class="notice warn-box" id="unsaved-warning">
+      There is no way to recover the organizer link. It is not stored anywhere else, and it is not
+      tied to an account. Copy it, download it or mail it to yourself before you close this tab.
+    </div>
+
+    <div class="actions">
+      <a id="open-admin" href="#"><button type="button" class="primary">Open the poll</button></a>
+    </div>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <strong>Scheduler</strong>
+    <span>Polls are private by link.</span>
+    <span class="spacer">Accounts optional. No tracking.</span>
+  </div>
+</footer>
+
+<script src="/create.js"></script>
+<script src="/account.js"></script>
+</body>
+</html>

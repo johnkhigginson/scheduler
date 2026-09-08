@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>My polls | Scheduler</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/app.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='14'>&#128197;</text></svg>">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="wordmark" href="/">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="4.5" width="18" height="16" rx="2.5"></rect>
+        <path d="M3 9.5h18M8 2.5v4M16 2.5v4M9 14.5l2 2 4-4"></path>
+      </svg>
+      Scheduler
+      <span class="wordmark-sub">Pick a date everyone can actually make</span>
+    </a>
+    <nav class="site-nav">
+      <a href="/">New poll</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap" id="main">
+
+  <div id="notice" class="notice" hidden aria-live="polite"></div>
+
+  <div class="card" id="signed-out" hidden>
+    <h1>My polls</h1>
+    <p class="lede">Sign in to see the polls you have made.</p>
+    <div class="actions"><a href="/signin"><button type="button" class="primary">Sign in</button></a></div>
+  </div>
+
+  <div id="dash" hidden>
+    <div class="card">
+      <h1>My polls</h1>
+      <p class="lede" id="who"></p>
+      <div class="actions" style="margin-top:0">
+        <a href="/"><button type="button" class="primary">New poll</button></a>
+        <button type="button" id="signout">Sign out</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Polls</h2>
+      <div id="poll-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <strong>Scheduler</strong>
+    <span>Polls are private by link.</span>
+    <span class="spacer">No tracking.</span>
+  </div>
+</footer>
+
+<script src="/account.js"></script>
+</body>
+</html>

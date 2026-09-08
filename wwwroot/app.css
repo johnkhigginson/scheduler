@@ -1,0 +1,999 @@
+/*
+  Design tokens. This app is deliberately light only. color-scheme on the root stops the browser
+  from auto darkening form controls and scrollbars, which is what produces the half dark look when
+  a light page is opened on a device set to dark.
+*/
+
+:root {
+  color-scheme: light;
+
+  --bg: #f5f7f9;
+  --bg-accent: #eef2f5;
+  --surface: #ffffff;
+  --surface-2: #f8fafb;
+  --ink: #111a24;
+  --muted: #5c6b7a;
+  --line: #e2e8ef;
+  --line-strong: #cfd8e3;
+
+  --accent: #12583a;
+  --accent-hover: #17703f;
+  --accent-ink: #ffffff;
+  --accent-soft: #eaf4ee;
+
+  --yes: #1c8a4e;
+  --yes-bg: #e6f5ec;
+  --maybe: #a86a12;
+  --maybe-bg: #fdf3e0;
+  --no: #b03636;
+  --no-bg: #fbeaea;
+  --best-bg: #eaf6f0;
+  --best-line: #b9dfc9;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 2px rgba(16, 32, 43, .05), 0 6px 20px rgba(16, 32, 43, .05);
+  --shadow-lg: 0 2px 4px rgba(16, 32, 43, .06), 0 16px 40px rgba(16, 32, 43, .09);
+  --header-h: 58px;
+}
+
+* { box-sizing: border-box; }
+
+/*
+  The hidden attribute only carries display:none from the user agent sheet, so any class that sets
+  display beats it. That is how the maybe legend stayed on screen for a poll that does not offer
+  maybe: .legend span sets inline-flex. Twelve elements on these two pages are toggled with hidden,
+  so this is enforced once rather than patched per selector.
+*/
+[hidden] { display: none !important; }
+
+html {
+  /* Stops iOS inflating text when the phone is turned sideways. */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--accent); }
+
+/* Site chrome */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+/* Falls back to the solid background above where backdrop-filter is unsupported. */
+@supports (backdrop-filter: blur(8px)) {
+  .site-header {
+    background: color-mix(in srgb, var(--surface) 82%, transparent);
+    backdrop-filter: saturate(1.6) blur(8px);
+  }
+}
+
+.site-header-inner,
+.site-footer-inner {
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -.2px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.wordmark svg { display: block; color: var(--accent); }
+.wordmark:hover { color: var(--accent); }
+
+.wordmark-sub {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0;
+  padding-left: 12px;
+  margin-left: 2px;
+  border-left: 1px solid var(--line);
+}
+
+.site-nav { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+
+.site-nav a {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 7px 11px;
+  border-radius: var(--radius-sm);
+}
+
+.site-nav a:hover { color: var(--ink); background: var(--surface-2); }
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  margin-top: 56px;
+  padding: 22px 0 40px;
+  background: var(--bg-accent);
+}
+
+.site-footer-inner {
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.site-footer strong { color: var(--ink); font-size: 13px; }
+.site-footer .spacer { margin-left: auto; }
+
+.wrap {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 28px 16px 8px;
+}
+
+/* Kept for any markup still using the old brand block. */
+.brand { display: flex; align-items: baseline; gap: 10px; margin-bottom: 20px; }
+.brand strong { font-size: 18px; letter-spacing: -.2px; }
+.brand span { color: var(--muted); font-size: 13px; }
+
+/* Hero */
+
+.hero { margin: 4px 0 26px; }
+
+.hero h1 {
+  font-size: 34px;
+  line-height: 1.15;
+  letter-spacing: -.8px;
+  margin: 0 0 10px;
+}
+
+.hero p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 17px;
+  max-width: 60ch;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 4px 11px;
+  margin-bottom: 14px;
+}
+
+/* Cards and type */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+  margin-bottom: 20px;
+}
+
+h1 { font-size: 25px; margin: 0 0 6px; letter-spacing: -.5px; }
+h2 { font-size: 13px; margin: 0 0 14px; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); }
+p.lede { margin: 0 0 18px; color: var(--muted); }
+
+label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+
+/* Every text-like control, including the ones that are easy to forget: datetime-local was missing
+   and rendered as raw browser chrome next to styled fields. */
+input[type=text], input[type=password], input[type=search], input[type=tel],
+input[type=date], input[type=time], input[type=datetime-local],
+input[type=number], input[type=email], input[type=url], textarea, select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  color: inherit;
+  background: var(--surface);
+}
+
+/*
+  A fixed height on the single line controls. Date, time and datetime-local carry an internal
+  picker button, so identical padding still left them two pixels taller than the text field or
+  select beside them, which reads as misalignment rather than as a different control.
+  Textarea is excluded on purpose: it has to grow.
+*/
+input[type=text], input[type=password], input[type=search], input[type=tel],
+input[type=date], input[type=time], input[type=datetime-local],
+input[type=number], input[type=email], input[type=url], select {
+  height: 46px;
+}
+
+/* Native select chrome differs wildly between browsers and platforms, so it is replaced with one
+   chevron that matches everything around it. */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 34px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none' stroke='%235c6b7a' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+select:hover { background-color: var(--surface-2); }
+
+/*
+  The calendar and clock buttons inside date and time fields are nearly invisible by default and
+  give no hint they are clickable, which is most of why those fields felt unlike the rest.
+*/
+input[type=date]::-webkit-calendar-picker-indicator,
+input[type=time]::-webkit-calendar-picker-indicator,
+input[type=datetime-local]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: .5;
+  padding: 2px;
+  margin-left: 4px;
+  border-radius: 5px;
+}
+
+input[type=date]::-webkit-calendar-picker-indicator:hover,
+input[type=time]::-webkit-calendar-picker-indicator:hover,
+input[type=datetime-local]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  background: var(--accent-soft);
+}
+
+input::placeholder, textarea::placeholder { color: var(--muted); opacity: .75; }
+
+input:hover, textarea:hover { border-color: var(--muted); }
+
+/* Checkboxes and radios were left at browser default size, so they read as a different toolkit
+   to the buttons beside them. */
+input[type=checkbox], input[type=radio] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+input:focus, textarea:focus, select:focus, button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+textarea { resize: vertical; min-height: 74px; }
+
+.field { margin-bottom: 15px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+.row > * { flex: 1 1 180px; }
+
+button {
+  font: inherit;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 10px 15px;
+  cursor: pointer;
+  /* Drops the 300ms tap delay mobile browsers add while waiting for a double tap. */
+  touch-action: manipulation;
+  transition: background .12s ease, border-color .12s ease, color .12s ease;
+}
+
+button:hover { border-color: var(--muted); background: var(--surface-2); }
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 1px 2px rgba(16, 32, 43, .12);
+}
+
+button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+button.danger { color: var(--no); border-color: var(--line-strong); }
+button.danger:hover { border-color: var(--no); background: var(--no-bg); }
+button.link { border: 0; background: none; padding: 5px 7px; color: var(--muted); font-weight: 500; }
+button.link:hover { color: var(--accent); background: none; text-decoration: underline; }
+button[disabled] { opacity: .5; cursor: not-allowed; }
+
+/* Keyboard first stop on every page. */
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 20;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 10px 16px;
+  border-radius: 0 0 var(--radius-sm) 0;
+}
+
+.skip:focus { left: 0; }
+
+/* The create action stays reachable however long the chosen day list grows. */
+.create-bar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 22px;
+  padding: 14px 0 4px;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+}
+
+.create-bar .muted { font-size: 13px; }
+
+.warn-box {
+  background: var(--maybe-bg);
+  border: 1px solid var(--maybe);
+  color: var(--ink);
+}
+
+.notice.ok { background: var(--yes-bg); border: 1px solid var(--yes); color: var(--ink); }
+
+/* Included or excluded, readable without relying on the strikethrough alone. */
+.chip-mark { font-size: 11px; margin-right: 5px; opacity: .75; }
+
+/* Organizer date list */
+.admin-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.admin-option:last-child { border-bottom: 0; }
+.admin-option-date { font-weight: 600; flex: 0 0 120px; padding-top: 5px; }
+
+/* A removable option. The cross only colours on hover so a wall of them is not alarming. */
+.chip.removable { padding-right: 8px; }
+.chip-x { margin-left: 7px; opacity: .5; font-size: 14px; line-height: 1; }
+.chip.removable:hover { background: var(--no-bg); border-color: var(--no); color: var(--no); }
+.chip.removable:hover .chip-x { opacity: 1; }
+.add-option { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.add-option input { width: auto; flex: 1 1 140px; min-width: 120px; }
+.add-option button { flex: 0 0 auto; }
+
+/* A date spanning its own time slots in the results header. */
+table.grid th.day-group {
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--surface-2);
+}
+
+/* Where one day ends and the next begins, carried down the whole table. Without it a wide poll
+   is an undifferentiated wall of columns. */
+table.grid th.daystart, table.grid td.daystart { border-left: 2px solid var(--line-strong); }
+
+/* A row that arrived since the last refresh. */
+table.grid tr.fresh > th, table.grid tr.fresh > td { background: var(--accent-soft); }
+
+/* Admin area */
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+}
+
+.stat-n {
+  display: block;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-l {
+  font-size: 11px;
+  letter-spacing: .7px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* One poll in the list. A button because the whole row opens the detail. */
+.poll-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  font-weight: 400;
+}
+
+.poll-row:hover { border-color: var(--accent); background: var(--accent-soft); }
+.poll-row-title { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.poll-row-title strong { font-size: 15px; }
+.poll-row-meta { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+.poll-row-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 13px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+
+.tag {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.tag.closed { background: var(--maybe-bg); color: var(--maybe); }
+
+@media (max-width: 620px) {
+  .poll-row { flex-direction: column; align-items: stretch; gap: 8px; }
+  .poll-row-counts { gap: 4px 12px; }
+}
+
+/* Weekday and range helper */
+
+.dow-picker {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.dow-picker > label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 8px; }
+.dows { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.dows button { padding: 8px 12px; font-size: 13px; }
+.dows button.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+.dow-range { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.dow-range label { font-size: 13px; color: var(--muted); }
+
+/* Inputs are full width by default, which pushed From and to onto lines of their own and made a
+   one line control three rows tall. */
+.dow-range input[type=date] { width: auto; flex: 1 1 150px; min-width: 130px; }
+.dow-range button { flex: 0 0 auto; }
+
+/* Time slot controls */
+
+.times {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  padding: 14px;
+}
+
+.check { display: flex; align-items: center; gap: 9px; font-size: 15px; cursor: pointer; }
+.check + .check { margin-top: 8px; }
+.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+
+.slot-fields { display: flex; flex-wrap: wrap; gap: 12px; margin: 12px 0 0; }
+.slot-fields .field { margin-bottom: 0; flex: 1 1 150px; }
+
+/* One set of opening hours, plus the weekdays it covers. */
+.window {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  padding: 12px;
+  margin: 12px 0;
+}
+
+.window-days { display: flex; flex-wrap: wrap; gap: 6px; }
+.window-days button { padding: 7px 11px; font-size: 13px; }
+.window-days button.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+.window-note { margin-top: 10px; font-size: 13px; color: var(--muted); }
+.window-note.bad { color: var(--no); font-weight: 600; }
+
+.warn { font-size: 13px; color: var(--no); font-weight: 600; }
+
+/* Chosen days and their generated slots */
+
+.day-block { border-bottom: 1px solid var(--line); padding: 10px 0; }
+.day-block:last-child { border-bottom: 0; }
+.day-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.day-head .remove { font-size: 18px; line-height: 1; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+.chip {
+  padding: 6px 10px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  border-color: var(--accent-soft);
+}
+
+/* An excluded slot stays visible so it can be put back, but reads as switched off. */
+.chip.off { background: var(--surface); border-color: var(--line); color: var(--muted); text-decoration: line-through; }
+
+/* Vote editor */
+
+.vote-editor { border-color: var(--line-strong); }
+
+/*
+  Bulk answering, written as one sentence: set ANSWER for DAYS at TIME. Segmented controls rather
+  than dropdowns so the whole state is visible without opening anything.
+*/
+.quickfill {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-bottom: 20px;
+}
+
+.qf-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.qf-word { font-size: 14px; color: var(--muted); }
+.qf-count { margin: 10px 0 0; font-size: 13px; color: var(--muted); }
+.qf-time { width: auto; flex: 0 1 150px; }
+.qf-apply { margin-left: auto; }
+
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.seg-item {
+  border: 0;
+  border-radius: 0;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  background: transparent;
+  border-right: 1px solid var(--line);
+}
+
+.seg-item:last-child { border-right: 0; }
+.seg-item:hover { background: var(--surface-2); }
+.seg-item.on { background: var(--ink); color: var(--surface); }
+.seg-item.yes.on { background: #15693b; color: #fff; }
+.seg-item.maybe.on { background: #855309; color: #fff; }
+.seg-item.no.on { background: #8f2b2b; color: #fff; }
+
+/*
+  One card per day. With up to three hundred options the day boundary is the main thing keeping
+  the list readable, so it gets a real edge rather than a heading in the flow.
+*/
+.day-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+
+.day-card.done { border-color: var(--yes); }
+
+.day-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+}
+
+.day-card.done .day-card-head { background: var(--yes-bg); }
+
+.day-card-title { display: flex; align-items: baseline; gap: 8px; }
+.day-card-title strong { font-size: 16px; }
+.day-card-date { font-size: 14px; color: var(--muted); }
+
+.day-card-count {
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.day-card-quick { display: flex; margin-left: auto; }
+.day-card-quick .seg-item {
+  border: 1px solid var(--line-strong);
+  border-right-width: 0;
+  padding: 6px 11px;
+  font-size: 12px;
+}
+.day-card-quick .seg-item:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.day-card-quick .seg-item:last-child { border-right-width: 1px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+
+.vote-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.vote-row:last-child { border-bottom: 0; }
+/* An answered row recedes, so what is left to do is what stands out. */
+.vote-row.answered .vote-when { color: var(--muted); }
+.vote-when { display: flex; flex-direction: column; gap: 2px; }
+.vote-when span { font-size: 13px; }
+
+.choices { display: flex; gap: 6px; }
+.choice { min-width: 76px; font-weight: 600; }
+
+/*
+  Selected states use a darker shade than the legend dots. White on the lighter --yes fails AA at
+  button text size, and the selected answer is the one thing here that must be unmistakable.
+*/
+.choice.on { color: #fff; }
+.choice.yes.on { background: #15693b; border-color: #15693b; }
+.choice.maybe.on { background: #855309; border-color: #855309; }
+.choice.no.on { background: #8f2b2b; border-color: #8f2b2b; }
+
+/* Optional extras, folded away so the common path is title, dates, create. */
+.more {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  padding: 0 14px;
+  margin-top: 22px;
+}
+
+.more[open] { padding-bottom: 4px; }
+.more > summary { cursor: pointer; padding: 14px 0; font-weight: 600; }
+
+/* Date picker */
+
+.presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+
+.picker {
+  display: grid;
+  grid-template-columns: minmax(250px, 310px) 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.cal {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px;
+  background: var(--surface-2);
+}
+
+.cal-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.cal-head strong { font-size: 15px; }
+.cal-nav { width: 40px; height: 40px; padding: 0; font-size: 20px; line-height: 1; }
+
+.cal-dow, .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+
+.cal-dow {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.cal-day {
+  height: 40px;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  /* A sweep across the grid should select days, not paint the page blue. */
+  user-select: none;
+}
+
+.cal-day.past { color: var(--muted); opacity: .5; }
+.cal-day.today { box-shadow: inset 0 0 0 2px var(--best-line); }
+
+.cal-day.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.cal-day.on:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+.picked-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+
+.bulk-time {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  padding: 12px;
+  margin-bottom: 14px;
+}
+
+.bulk-time .row > input { flex: 1 1 130px; }
+.bulk-time .row > button { flex: 0 0 auto; }
+
+.option-row {
+  display: grid;
+  grid-template-columns: 1fr 140px 44px;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.opt-label { font-weight: 600; font-size: 14px; }
+.option-row .remove { font-size: 18px; line-height: 1; }
+
+.actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 16px; }
+
+.notice {
+  border-radius: var(--radius-sm);
+  padding: 11px 13px;
+  font-size: 14px;
+  margin-bottom: 14px;
+  border: 1px solid transparent;
+}
+
+.notice.error { background: var(--no-bg); color: var(--no); border-color: var(--no); }
+.notice.info { background: var(--accent-soft); color: var(--accent); border-color: var(--best-line); }
+
+/* Grid */
+
+.grid-wrap {
+  overflow-x: auto;
+  /*
+    Setting overflow-x alone makes overflow-y compute to auto, which turns this into a vertical
+    scroll container that swallows the wheel. The table fills most of the screen on a wide poll, so
+    the page simply would not scroll with the cursor over it. Naming overflow-y explicitly fixes it.
+  */
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  /* The participant column is pinned, so the grid scrolls sideways on a phone rather than
+     squeezing every date into an unreadable strip. */
+  overscroll-behavior-x: contain;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+table.grid { border-collapse: separate; border-spacing: 0; width: 100%; }
+
+table.grid th, table.grid td {
+  border-bottom: 1px solid var(--line);
+  padding: 9px 10px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+table.grid tbody tr:last-child td { border-bottom: 0; }
+
+table.grid thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface-2);
+  font-size: 13px;
+  z-index: 2;
+}
+
+.name-col {
+  position: sticky;
+  left: 0;
+  background: var(--surface);
+  text-align: left !important;
+  min-width: 170px;
+  z-index: 1;
+  font-weight: 600;
+}
+
+thead .name-col { background: var(--surface-2); z-index: 3; }
+
+.col-date { font-weight: 700; }
+.col-dow, .col-time { display: block; font-weight: 500; color: var(--muted); font-size: 12px; }
+
+th.best { background: var(--best-bg) !important; box-shadow: inset 0 2px 0 var(--accent); }
+td.best { background: var(--best-bg); }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 28px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.pill.yes { background: var(--yes-bg); color: var(--yes); }
+.pill.maybe { background: var(--maybe-bg); color: var(--maybe); }
+.pill.no { background: var(--no-bg); color: var(--no); }
+.pill.none { color: var(--line-strong); }
+
+button.cell {
+  width: 40px;
+  height: 32px;
+  padding: 0;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+button.cell.yes { background: var(--yes-bg); border-color: var(--yes); color: var(--yes); }
+button.cell.maybe { background: var(--maybe-bg); border-color: var(--maybe); color: var(--maybe); }
+button.cell.no { background: var(--no-bg); border-color: var(--no); color: var(--no); }
+
+tr.editing td { background: var(--accent-soft); }
+tr.mine .name-col::after { content: " (you)"; color: var(--muted); font-weight: 400; font-size: 12px; }
+
+tfoot td { font-weight: 700; background: var(--surface-2); }
+tfoot /* Holds the row height steady now that the maybe line only appears where there is a maybe. */
+table.grid tfoot td { min-height: 0; height: 52px; }
+
+.tally-sub { display: block; font-weight: 500; font-size: 11px; color: var(--muted); }
+
+.row-tools { display: inline-flex; gap: 2px; margin-left: 6px; vertical-align: middle; }
+
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: 14px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+.winner {
+  background: var(--best-bg);
+  border: 1px solid var(--best-line);
+  border-radius: var(--radius);
+  padding: 15px 17px;
+  margin-bottom: 20px;
+}
+
+.winner strong { color: var(--accent); }
+
+.comment { border-top: 1px solid var(--line); padding: 13px 0; }
+.comment:first-of-type { border-top: 0; }
+.comment .meta { font-size: 13px; color: var(--muted); margin-bottom: 3px; }
+.comment .meta b { color: var(--ink); font-size: 14px; }
+.comment .body { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.share { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+
+.share input {
+  flex: 1 1 320px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  background: var(--surface-2);
+}
+
+.muted { color: var(--muted); font-size: 13px; }
+.closed-banner { background: var(--maybe-bg) !important; color: var(--maybe) !important; border-color: var(--maybe) !important; }
+
+/* The picker is two columns only while there is genuinely room for two. */
+@media (max-width: 880px) {
+  .picker { grid-template-columns: 1fr; }
+  .cal { max-width: 420px; }
+}
+
+@media (max-width: 620px) {
+  .hero h1 { font-size: 27px; }
+  .hero p { font-size: 16px; }
+  .wordmark-sub { display: none; }
+  .card { padding: 16px; }
+  .wrap { padding: 20px 12px 8px; }
+
+  /* Touch targets. Anything tappable gets close to the 44px guideline. */
+  button { padding: 12px 16px; }
+  .cal { max-width: none; padding: 10px; }
+  .cal-day { height: 44px; font-size: 15px; }
+  .cal-nav { width: 44px; height: 44px; }
+  button.cell { width: 44px; height: 44px; font-size: 17px; }
+  .pill { width: 40px; height: 34px; }
+
+  /* Full width buttons read as buttons on a phone, and stop double column wrapping. */
+  .presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .presets button { width: 100%; }
+  .actions button.primary { flex: 1 1 100%; }
+
+  /* The sentence stacks into labelled rows rather than wrapping into an unreadable ribbon. */
+  .qf-line { flex-direction: column; align-items: stretch; gap: 6px; }
+  .qf-word { font-weight: 600; color: var(--ink); margin-top: 6px; }
+  .seg { width: 100%; }
+  .seg-item { flex: 1 1 0; text-align: center; padding: 11px 4px; }
+  .qf-time { width: 100%; flex: 1 1 auto; }
+  .qf-apply { margin-left: 0; width: 100%; margin-top: 10px; }
+
+  .day-card-head { padding: 11px 12px; }
+  .day-card-quick { margin-left: 0; width: 100%; }
+  .day-card-quick .seg-item { flex: 1 1 0; }
+  .vote-row { padding: 10px 12px; }
+
+  /* Yes, Maybe and No become three full width targets rather than a cramped row. */
+  .vote-row { flex-direction: column; align-items: stretch; gap: 10px; }
+  .choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .choice { min-width: 0; width: 100%; padding: 14px 6px; }
+
+  .option-row { grid-template-columns: 1fr 128px 44px; gap: 6px; }
+  .name-col { min-width: 116px; }
+
+  /*
+    Edit and Delete sat inline after the name, which widened the pinned column and left barely two
+    vote columns visible on a phone. They drop under the name instead, and the whole row-tools
+    block only appears for your own row or for the organizer anyway.
+  */
+  .row-tools { display: flex; margin-left: -6px; margin-top: 2px; }
+  table.grid th, table.grid td { padding: 8px 6px; }
+  .col-date { font-size: 14px; }
+
+  /* iOS zooms the whole page when a focused field is under 16px. Select counts too. */
+  input[type=text], input[type=password], input[type=search], input[type=tel],
+  input[type=date], input[type=time], input[type=datetime-local],
+  input[type=number], textarea, select {
+    font-size: 16px;
+  }
+
+  /* Bigger hit areas for the pickers on touch. */
+  input[type=date]::-webkit-calendar-picker-indicator,
+  input[type=time]::-webkit-calendar-picker-indicator,
+  input[type=datetime-local]::-webkit-calendar-picker-indicator {
+    padding: 6px;
+    opacity: .7;
+  }
+  .share input { font-size: 14px; }
+
+  .site-footer-inner { font-size: 12px; }
+  .site-footer .spacer { margin-left: 0; }
+}
+
+/* Coarse pointers get the larger targets regardless of viewport width, which covers tablets. */
+@media (pointer: coarse) {
+  button.cell { min-width: 44px; min-height: 44px; }
+  .cal-day { min-height: 44px; }
+  .row-tools button { padding: 8px 10px; }
+}
+
+/* Respect a reduced motion preference. The transitions here are decorative only. */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

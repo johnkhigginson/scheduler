@@ -1,0 +1,20 @@
+bin/
+obj/
+publish/
+appsettings.Development.json
+appsettings.Production.json
+*.user
+*.suo
+.vs/
+.vscode/
+.idea/
+.DS_Store
+
+# Deploy keys and env files never belong in here.
+*.pem
+*_deploy
+*_deploy.pub
+*.env
+
+# Internal deployment runbook, kept local and out of the public repo.
+docs/HANDOFF.md

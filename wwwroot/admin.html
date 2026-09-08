@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin | Scheduler</title>
+<link rel="stylesheet" href="/app.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='14'>&#128197;</text></svg>">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="wordmark" href="/">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="4.5" width="18" height="16" rx="2.5"></rect>
+        <path d="M3 9.5h18M8 2.5v4M16 2.5v4M9 14.5l2 2 4-4"></path>
+      </svg>
+      Scheduler
+      <span class="wordmark-sub">Admin</span>
+    </a>
+    <nav class="site-nav">
+      <a href="/">New poll</a>
+      <a href="#" id="lock" hidden>Lock</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap" id="main">
+
+  <div class="card" id="gate">
+    <h1>Admin</h1>
+    <p class="lede">Every poll on this server, with its responses. This also shows organizer links,
+    which are the only way back into a poll's controls, so treat the key like a password.</p>
+
+    <div id="gate-error" class="notice error" hidden></div>
+
+    <div class="field">
+      <label for="key">Admin key</label>
+      <input type="password" id="key" autocomplete="current-password" spellcheck="false">
+    </div>
+
+    <div class="actions">
+      <button type="button" id="unlock" class="primary">Unlock</button>
+    </div>
+    <p class="muted" style="margin:12px 0 0">The key is kept on this device only. Lock clears it.</p>
+  </div>
+
+  <div id="dash" hidden>
+    <div id="notice" class="notice" hidden aria-live="polite"></div>
+
+    <div class="stat-row" id="stats"></div>
+
+    <div class="card">
+      <h2>Polls</h2>
+      <div id="poll-list"></div>
+    </div>
+
+    <div class="card" id="detail" hidden></div>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <strong>Scheduler</strong>
+    <span>Admin area.</span>
+    <span class="spacer">Polls are private by link.</span>
+  </div>
+</footer>
+
+<script src="/admin.js"></script>
+</body>
+</html>

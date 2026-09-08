@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="noindex">
+<title>Scheduler</title>
+<link rel="stylesheet" href="/app.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='14'>&#128197;</text></svg>">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="wordmark" href="/">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="4.5" width="18" height="16" rx="2.5"></rect>
+        <path d="M3 9.5h18M8 2.5v4M16 2.5v4M9 14.5l2 2 4-4"></path>
+      </svg>
+      Scheduler
+      <span class="wordmark-sub">Pick a date everyone can actually make</span>
+    </a>
+    <nav class="site-nav">
+      <a href="/">New poll</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap" id="main">
+
+  <div id="status" class="notice info">Loading the poll...</div>
+  <div id="notice" class="notice" hidden aria-live="polite"></div>
+
+  <div id="poll" hidden>
+
+    <div class="card">
+      <h1 id="title"></h1>
+      <p class="lede" id="organizer"></p>
+      <p id="description" style="white-space:pre-wrap;margin:0"></p>
+    </div>
+
+    <div id="closed-banner" class="notice closed-banner" hidden>
+      Voting is closed. Only the organizer can make changes now.
+    </div>
+
+    <div id="deadline-note" class="notice info" hidden></div>
+
+    <div id="winner" class="winner" hidden></div>
+
+    <div class="card vote-editor" id="vote-editor" hidden>
+      <h2 id="vote-editor-title">Your availability</h2>
+      <div class="field">
+        <label for="vote-name">Your name</label>
+        <input type="text" id="vote-name" maxlength="60" placeholder="Your name" autocomplete="name">
+      </div>
+      <div class="quickfill" id="quickfill"></div>
+      <div id="vote-list"></div>
+      <div class="actions">
+        <button type="button" id="vote-save" class="primary">Save my availability</button>
+        <button type="button" id="vote-cancel">Cancel</button>
+      </div>
+      <p class="muted" style="margin:12px 0 0">You can change this later from this browser. On another
+      device, or after clearing site data, you will not be able to edit or remove it.</p>
+    </div>
+
+    <div class="grid-wrap">
+      <table class="grid">
+        <thead><tr id="head-days"></tr><tr id="head-row"></tr></thead>
+        <tbody id="body-rows"></tbody>
+        <tfoot><tr id="tally-row"></tr></tfoot>
+      </table>
+    </div>
+
+    <div class="legend">
+      <span><i class="dot" style="background:var(--yes)"></i> Yes</span>
+      <span id="legend-maybe" hidden><i class="dot" style="background:var(--maybe)"></i> Maybe</span>
+      <span><i class="dot" style="background:var(--no)"></i> No</span>
+      <span>The best scoring date is highlighted.</span>
+    </div>
+
+    <p id="tz-note" class="muted" hidden></p>
+
+    <div class="actions" id="grid-actions"></div>
+
+    <div class="card" style="margin-top:24px">
+      <h2>Share</h2>
+      <div class="share">
+        <input type="text" id="share-link" readonly>
+        <button type="button" data-copy="share-link">Copy</button>
+      </div>
+    </div>
+
+    <div class="card" id="admin-card" hidden>
+      <h2>Organizer controls</h2>
+      <div class="actions" style="margin-top:0">
+        <button type="button" id="toggle-closed"></button>
+        <button type="button" id="delete-poll" class="danger">Delete poll</button>
+      </div>
+
+      <label class="check" style="margin-top:16px">
+        <input type="checkbox" id="admin-allow-maybe"> Offer "maybe" as an answer
+      </label>
+
+      <h3 style="margin:22px 0 8px;font-size:15px">Dates in this poll</h3>
+      <div id="admin-options"></div>
+      <div class="add-option">
+        <input type="date" id="new-option-date" aria-label="New date">
+        <input type="time" id="new-option-time" step="900" aria-label="Time for the new date">
+        <button type="button" id="add-option">Add this date</button>
+      </div>
+
+      <p class="muted" style="margin-bottom:0">You are signed in as the organizer on this device.</p>
+    </div>
+
+    <div class="card">
+      <h2>Comments</h2>
+      <div id="comments"></div>
+      <div class="row" style="margin-top:16px">
+        <input type="text" id="comment-name" maxlength="60" placeholder="Your name" autocomplete="name">
+      </div>
+      <div class="field" style="margin-top:10px">
+        <textarea id="comment-text" maxlength="2000" placeholder="Say something useful. Or don't."></textarea>
+      </div>
+      <div class="actions" style="margin-top:0">
+        <button type="button" id="add-comment" class="primary">Post comment</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <strong>Scheduler</strong>
+    <span>Polls are private by link.</span>
+    <span class="spacer">Accounts optional. No tracking.</span>
+  </div>
+</footer>
+
+<script src="/poll.js"></script>
+<script src="/account.js"></script>
+</body>
+</html>

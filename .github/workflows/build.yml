@@ -1,0 +1,76 @@
+name: build
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - run: dotnet build DraftPoll.csproj -c Release --nologo -warnaserror
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ping:1})'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish
+        run: dotnet publish DraftPoll.csproj -c Release -o publish --nologo
+
+      # Start, wait, test and stop in one step so the app's lifetime is bounded by the step.
+      - name: End to end tests
+        env:
+          ConnectionStrings__Mongo: mongodb://127.0.0.1:27017
+          Mongo__Database: e2e
+          ASPNETCORE_URLS: http://127.0.0.1:5099
+        run: |
+          nohup dotnet publish/DraftPoll.dll > app.log 2>&1 &
+          APP_PID=$!
+
+          for _ in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:5099/healthz >/dev/null 2>&1; then break; fi
+            sleep 2
+          done
+
+          if ! curl -fsS http://127.0.0.1:5099/healthz >/dev/null 2>&1; then
+            echo "App never became healthy. Log follows:"
+            cat app.log
+            exit 1
+          fi
+
+          status=0
+          BASE_URL=http://127.0.0.1:5099 bash tests/e2e.sh || status=$?
+
+          kill "$APP_PID" 2>/dev/null || true
+          if [ "$status" -ne 0 ]; then
+            echo "App log follows:"
+            cat app.log
+          fi
+          exit "$status"
