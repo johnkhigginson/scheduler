@@ -5,6 +5,11 @@ on:
   push:
     branches-ignore: [main]
 
+# Anyone can open a pull request against a public repo, and that runs this file as the PR author
+# wrote it. Nothing here writes anything, so the token gets no more than checkout needs.
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest

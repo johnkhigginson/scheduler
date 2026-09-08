@@ -5,6 +5,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# The deploy identity is the SSH key, not the workflow token. Checkout is all the token is for.
+permissions:
+  contents: read
+
 # Never let two deploys race each other onto the same box.
 concurrency:
   group: deploy-production
