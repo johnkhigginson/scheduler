@@ -8,6 +8,12 @@ namespace DraftPoll;
 public static class Site
 {
     /// <summary>
+    /// The user facing product name, for everything the server writes: share tags and email.
+    /// Internal names stay DraftPoll. See the rebrand checklist in CLAUDE.md for the rest.
+    /// </summary>
+    public const string Name = "Scheduler";
+
+    /// <summary>
     /// Share tags and canonical links have to be absolute, and they should name the public site
     /// whichever host the request happened to arrive on.
     /// </summary>
@@ -41,8 +47,8 @@ public static class Site
     /// </summary>
     public static string ShareTags(Poll? poll)
     {
-        var title = poll is null ? "Scheduler poll" : poll.Title + " | Scheduler";
-        var shareTitle = poll?.Title ?? "A date poll on Scheduler";
+        var title = poll is null ? Name + " poll" : poll.Title + " | " + Name;
+        var shareTitle = poll?.Title ?? "A date poll on " + Name;
         var description = poll is null
             ? "Mark yes or no on each date and see which one works for everyone. Free, no sign-up."
             : Summary(poll);
@@ -54,7 +60,7 @@ public static class Site
         html.Append("<title>").Append(e(title)).Append("</title>\n");
         html.Append("<meta name=\"description\" content=\"").Append(e(description)).Append("\">\n");
         html.Append("<meta property=\"og:type\" content=\"website\">\n");
-        html.Append("<meta property=\"og:site_name\" content=\"Scheduler\">\n");
+        html.Append("<meta property=\"og:site_name\" content=\"").Append(e(Name)).Append("\">\n");
         html.Append("<meta property=\"og:title\" content=\"").Append(e(shareTitle)).Append("\">\n");
         html.Append("<meta property=\"og:description\" content=\"").Append(e(description)).Append("\">\n");
         html.Append("<meta property=\"og:url\" content=\"").Append(e(url)).Append("\">\n");

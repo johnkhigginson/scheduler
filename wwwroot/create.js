@@ -522,7 +522,7 @@
   function markSaved() { linksSaved = true; document.getElementById('unsaved-warning').hidden = true; }
 
   function linksText(title, publicUrl, adminUrl) {
-    return 'Scheduler poll: ' + title + '\n\n' +
+    return SITE_NAME + ' poll: ' + title + '\n\n' +
       'Share this link with everyone:\n' + publicUrl + '\n\n' +
       'Organizer link, keep this private. It is the only way back into the controls:\n' + adminUrl + '\n';
   }
@@ -683,11 +683,11 @@
       created = true;
       // A tab left on this screen holds the only copy of an unrecoverable link, so say so in the
       // one place that survives being buried behind twenty other tabs.
-      document.title = 'Save your organizer link | Scheduler';
+      document.title = 'Save your organizer link | ' + SITE_NAME;
 
       var body = linksText(title, base, adminUrl);
       document.getElementById('email-links').href = 'mailto:?subject=' +
-        encodeURIComponent('Scheduler poll: ' + title) + '&body=' + encodeURIComponent(body);
+        encodeURIComponent(SITE_NAME + ' poll: ' + title) + '&body=' + encodeURIComponent(body);
       document.getElementById('email-links').addEventListener('click', markSaved);
 
       document.getElementById('save-links').addEventListener('click', function () {

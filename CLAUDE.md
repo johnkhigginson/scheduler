@@ -29,7 +29,7 @@ Program.cs               endpoint definitions, top level statements
 Api.cs                   validation, auth, response shaping, option parsing, rate limit keys
 Auth.cs                  users, sign in links, sessions. Tokens stored as hashes
 Mailer.cs                the two emails this app sends (sign in link, poll links), through Postmark
-Site.cs                  canonical origin, support email placeholder, per poll share tags
+Site.cs                  product name, canonical origin, support email placeholder, per poll share tags
 Models.cs                Mongo documents, request records, id generator
 PollStore.cs             Mongo collection access, index setup, every write
 appsettings.json         local defaults, connection string is overridden in Production
@@ -41,6 +41,7 @@ wwwroot/admin.html       every poll and its responses, behind one key
 wwwroot/signin.html      ask for a sign in link
 wwwroot/my.html          polls belonging to the signed in account
 wwwroot/app.css          all styling, CSS variables at the top
+wwwroot/site.js          SITE_NAME, the product name for copy built in script. Load it first
 wwwroot/privacy.html     privacy page at /privacy. Keep it true to what the code stores
 wwwroot/terms.html       terms page at /terms
 wwwroot/*-alternative.html  Doodle, When2meet and Framadate comparison pages at clean URLs.
@@ -52,6 +53,7 @@ wwwroot/sitemap.xml      static, list every indexable page here
 wwwroot/og.png           1200x630 share image; favicon.ico, favicon.svg, apple-touch-icon.png
 tests/e2e.sh             149 checks, run against a throwaway database
 deploy/                  systemd unit, Caddy block, bootstrap script
+tools/rebrand.sh         rewrites the product name in the static pages, site.js, Site.Name and tests
 .github/workflows/       build and test, then test and deploy
 ```
 
@@ -147,6 +149,27 @@ Poll pages show voters one "Made with Scheduler" line, `#made-with` in `poll.htm
 copies it beside the confirmation after a vote, so hiding that one element hides both.
 
 When the privacy page and the code disagree, the code is right and the page is a bug.
+
+## Rebrand checklist
+
+The product name is changing, so it lives in as few places as possible. Running
+`tools/rebrand.sh Scheduler "New Name"` covers the first three. The rest are by hand.
+
+1. `Site.Name` in `Site.cs`: per poll page titles, share tags, and both emails in `Mailer.cs`.
+2. `SITE_NAME` in `wwwroot/site.js`: the tab title and links text after creating a poll, the poll
+   page tab title, and the calendar export `PRODID`. Any new script copy uses it too.
+3. Static pages, every `wwwroot/*.html`: titles, share tags, JSON-LD, wordmark, footer, and the copy
+   on the privacy, terms and comparison pages. They are rewritten in place rather than filled in at
+   startup, so they stay plain files with their normal ETags. Reread the comparison pages after: an
+   "a" or "an" before the name may need to change. Also `tests/e2e.sh` and the `README.md` title.
+4. `og.png` draws the name as text in the image. It needs a new image at 1200x630.
+5. `favicon.svg`, `favicon.ico` and `apple-touch-icon.png` carry only the calendar mark, no name. They
+   change only if the mark does.
+6. The domain is a separate decision: `Site.Origin`, canonical links, `sitemap.xml`, `robots.txt`,
+   `og.png`, the e2e checks, `Postmark:From` and the Caddy block all name `scheduler.sdw.dev` or
+   `sdw.dev`. So does the GitHub link in every footer.
+7. Deliberately unchanged: every internal `DraftPoll` name, and the `@scheduler` suffix on calendar
+   export UIDs, so an event exported before the rebrand still matches one exported after it.
 
 ## Testing
 

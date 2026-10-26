@@ -35,16 +35,16 @@ public sealed class Mailer
         }
 
         var text =
-            "Here is your sign in link for Scheduler.\n\n" + link +
+            "Here is your sign in link for " + Site.Name + ".\n\n" + link +
             "\n\nIt works once and expires in 15 minutes. If you did not ask for it, ignore this email.\n";
 
         var html =
-            "<p>Here is your sign in link for Scheduler.</p>" +
+            "<p>Here is your sign in link for " + Site.Name + ".</p>" +
             "<p><a href=\"" + link + "\">Sign in</a></p>" +
             "<p>It works once and expires in 15 minutes. If you did not ask for it, ignore this email.</p>" +
             "<p style=\"color:#5c6b7a;font-size:13px\">" + link + "</p>";
 
-        return await SendAsync(to, "Your Scheduler sign in link", text, html, "sign in", logBody: true);
+        return await SendAsync(to, "Your " + Site.Name + " sign in link", text, html, "sign in", logBody: true);
     }
 
     /// <summary>
@@ -61,7 +61,7 @@ public sealed class Mailer
         }
 
         var text =
-            "Your Scheduler poll: " + title + "\n\n" +
+            "Your " + Site.Name + " poll: " + title + "\n\n" +
             "Share this link with everyone:\n" + publicUrl + "\n\n" +
             "Organizer link, keep this private. It is the only way back into the controls:\n" + adminUrl +
             "\n\nYou asked for this email on the page that created the poll. If you did not, ignore it.\n";
@@ -69,14 +69,14 @@ public sealed class Mailer
         // The title is user text, so it is encoded before it goes anywhere near the HTML body.
         var safeTitle = WebUtility.HtmlEncode(title);
         var html =
-            "<p>Your Scheduler poll: <strong>" + safeTitle + "</strong></p>" +
+            "<p>Your " + Site.Name + " poll: <strong>" + safeTitle + "</strong></p>" +
             "<p>Share this link with everyone:<br><a href=\"" + publicUrl + "\">" + publicUrl + "</a></p>" +
             "<p>Organizer link, keep this private. It is the only way back into the controls:<br>" +
             "<a href=\"" + adminUrl + "\">" + adminUrl + "</a></p>" +
             "<p style=\"color:#5c6b7a;font-size:13px\">You asked for this email on the page that created the poll. If you did not, ignore it.</p>";
 
         // A line break in a subject is not valid, and a title can carry one.
-        var subject = "Your Scheduler poll links: " + title.ReplaceLineEndings(" ");
+        var subject = "Your " + Site.Name + " poll links: " + title.ReplaceLineEndings(" ");
         return await SendAsync(to, subject, text, html, "poll links", logBody: false);
     }
 

@@ -143,7 +143,7 @@
   function icsFor(winners) {
     var now = utcStamp(new Date());
     var url = location.origin + '/p/' + poll.publicId;
-    var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Scheduler//EN',
+    var lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//' + SITE_NAME + '//EN',
       'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
 
     winners.forEach(function (row) {
@@ -220,7 +220,7 @@
 
   function render() {
     document.getElementById('title').textContent = poll.title;
-    document.title = poll.title + ' | Scheduler';
+    document.title = poll.title + ' | ' + SITE_NAME;
 
     var organizer = document.getElementById('organizer');
     organizer.textContent = poll.organizerName ? 'Organized by ' + poll.organizerName : '';
