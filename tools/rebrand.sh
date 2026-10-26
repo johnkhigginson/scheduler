@@ -41,5 +41,5 @@ for path in files:
 PY
 
 echo
-echo "Still to do by hand: og.png, the alternative page copy (check a/an before the new name),"
+echo "Still to do by hand: og.png, the comparison and use case copy (check a/an before the new name),"
 echo "and the rest of the rebrand checklist in CLAUDE.md."

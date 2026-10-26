@@ -333,23 +333,37 @@ body GET /p/doesnotexist00 '' $IP7 | grep -qF '<meta property="og:title" content
   && ok "unknown poll gets generic share tags" || bad "unknown poll gets generic share tags" "missing"
 code DELETE "/api/polls/$SHPUB" '' $IP3 -H "X-Admin-Token: $SHADM" >/dev/null
 
-for slug in doodle-alternative when2meet-alternative framadate-alternative; do
+COMPARE_PAGES="doodle-alternative when2meet-alternative framadate-alternative rallly-alternative
+  strawpoll-alternative crab-fit-alternative"
+USE_CASE_PAGES="dnd-session-scheduler book-club-date-poll family-reunion-date-poll class-reunion-date-poll
+  team-offsite-date-poll band-practice-scheduler volunteer-meeting-poll bachelor-party-date-poll
+  group-date-poll meeting-poll"
+SITEMAP=$(body GET /sitemap.xml '' $IP7)
+for slug in $COMPARE_PAGES $USE_CASE_PAGES how-it-works use-cases; do
   is "$slug page loads" "$(code GET "/$slug" '' $IP7)" 200
   ALT=$(body GET "/$slug" '' $IP7)
+  echo "$ALT" | grep -q '<h1>' && ok "$slug has its h1" || bad "$slug has its h1" "missing"
   echo "$ALT" | grep -qF "<link rel=\"canonical\" href=\"https://scheduler.sdw.dev/$slug\">" \
     && ok "$slug names its canonical url" || bad "$slug names its canonical url" "missing"
   echo "$ALT" | grep -qF "href=\"/?ref=$slug\"" && ok "$slug links to create a poll" || bad "$slug links to create a poll" "missing"
-  body GET /sitemap.xml '' $IP7 | grep -qF "<loc>https://scheduler.sdw.dev/$slug</loc>" \
+  echo "$SITEMAP" | grep -qF "<loc>https://scheduler.sdw.dev/$slug</loc>" \
     && ok "sitemap lists $slug" || bad "sitemap lists $slug" "missing"
 done
-echo "$HOME_HTML" | grep -qF 'href="/when2meet-alternative"' && ok "footer links the comparison pages" || bad "footer links the comparison pages" "missing"
+HUB=$(body GET /use-cases '' $IP7)
+for slug in $COMPARE_PAGES $USE_CASE_PAGES; do
+  echo "$HUB" | grep -qF "href=\"/$slug\"" && ok "the use cases hub links $slug" || bad "the use cases hub links $slug" "missing"
+done
+echo "$HUB" | grep -qF '<h2 id="compare">' && ok "the hub has the compare anchor" || bad "the hub has the compare anchor" "missing"
+echo "$HOME_HTML" | grep -qF 'href="/use-cases"' && ok "footer links the use cases hub" || bad "footer links the use cases hub" "missing"
+echo "$HOME_HTML" | grep -qF 'href="/use-cases#compare"' && ok "footer links the comparisons" || bad "footer links the comparisons" "missing"
+echo "$HOME_HTML" | grep -qF 'href="/how-it-works"' && ok "footer links how it works" || bad "footer links how it works" "missing"
 body GET /p/doesnotexist00 '' $IP7 | grep -qF 'href="/?ref=poll"' && ok "poll pages carry the made with link" || bad "poll pages carry the made with link" "missing"
 
 is "unknown page is 404" "$(code GET /no-such-page '' $IP7)" 404
 # One main landmark and one h1 per page. Pages that swap views share a single h1 rather than
 # carrying one per view.
-for page in / /p/doesnotexist00 /my /admin /signin /privacy /terms /doodle-alternative \
-            /when2meet-alternative /framadate-alternative /no-such-page; do
+for page in / /p/doesnotexist00 /my /admin /signin /privacy /terms /no-such-page \
+            $(for slug in $COMPARE_PAGES $USE_CASE_PAGES how-it-works use-cases; do echo "/$slug"; done); do
   HTML=$(body GET "$page" '' $IP7)
   is "$page has one main and one h1" \
     "$(echo "$HTML" | grep -o '<main[ >]' | wc -l | tr -d ' ')/$(echo "$HTML" | grep -o '<h1[ >]' | wc -l | tr -d ' ')" "1/1"

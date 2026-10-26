@@ -46,14 +46,20 @@ wwwroot/app.css          all styling, CSS variables at the top
 wwwroot/site.js          SITE_NAME, the product name for copy built in script. Load it first
 wwwroot/privacy.html     privacy page at /privacy. Keep it true to what the code stores
 wwwroot/terms.html       terms page at /terms
-wwwroot/*-alternative.html  Doodle, When2meet and Framadate comparison pages at clean URLs.
-                         Competitor facts are dated October 2026; every Scheduler claim must be
-                         true of the code
+wwwroot/*-alternative.html  Doodle, When2meet, Framadate, Rallly, StrawPoll and Crab Fit comparison
+                         pages. Competitor facts are dated October 2026 and were checked on the
+                         competitor's own site; every Scheduler claim must be true of the code
+wwwroot/*-date-poll.html, *-scheduler.html, meeting-poll.html, volunteer-meeting-poll.html
+                         use case pages, one per kind of group, each with its own setup steps.
+                         Visible FAQ and FAQPage JSON-LD carry the same text
+wwwroot/how-it-works.html  walkthrough of every step. No HowTo markup, Google dropped it
+wwwroot/use-cases.html   hub linking every use case and, under #compare, every comparison. The
+                         footer's "Use cases" and "Compare" links point here
 wwwroot/404.html         served by the fallback for unknown non API GETs
 wwwroot/robots.txt       keeps crawlers off /p/ and private routes, lets link preview bots in
 wwwroot/sitemap.xml      static, list every indexable page here
 wwwroot/og.png           1200x630 share image; favicon.ico, favicon.svg, apple-touch-icon.png
-tests/e2e.sh             195 checks, run against a throwaway database
+tests/e2e.sh             307 checks, run against a throwaway database
 tests/*.test.js          slots.js and zones.js under node. e2e.sh runs them and counts their checks
 deploy/                  systemd unit, Caddy block, bootstrap script
 tools/rebrand.sh         rewrites the product name in the static pages, site.js, Site.Name and tests
@@ -146,6 +152,11 @@ HTML encoded there. Keep the markers or startup throws.
 Routing runs after static files (`app.UseRouting()` in `Program.cs`) so the catch all 404 page does
 not shadow `/` and real files. API and `/auth` paths keep their bare 404.
 
+A new indexable page is a plain file in `wwwroot` and needs four more edits: its slug in the clean
+URL list in `Program.cs`, a `<url>` in `sitemap.xml`, the matching slug list in `tests/e2e.sh`, and a
+link from `use-cases.html` if it is a use case or comparison. Copy the head, header and footer of an
+existing page so the canonical, share tags and footer match.
+
 There is no support email yet. `Site.SupportEmail` in `Site.cs` is the one placeholder, marked
 `TODO(john)`, and nothing renders it. Pages point people at GitHub issues instead. Never put any
 other address on the site.
@@ -164,9 +175,10 @@ The product name is changing, so it lives in as few places as possible. Running
 2. `SITE_NAME` in `wwwroot/site.js`: the tab title and links text after creating a poll, the poll
    page tab title, and the calendar export `PRODID`. Any new script copy uses it too.
 3. Static pages, every `wwwroot/*.html`: titles, share tags, JSON-LD, wordmark, footer, and the copy
-   on the privacy, terms and comparison pages. They are rewritten in place rather than filled in at
-   startup, so they stay plain files with their normal ETags. Reread the comparison pages after: an
-   "a" or "an" before the name may need to change. Also `tests/e2e.sh` and the `README.md` title.
+   on the privacy, terms, how it works, use case and comparison pages. They are rewritten in place
+   rather than filled in at startup, so they stay plain files with their normal ETags. Reread the
+   comparison and use case pages after: an "a" or "an" before the name may need to change. Also
+   `tests/e2e.sh` and the `README.md` title.
 4. `og.png` draws the name as text in the image. It needs a new image at 1200x630.
 5. `favicon.svg`, `favicon.ico` and `apple-touch-icon.png` carry only the calendar mark, no name. They
    change only if the mark does.

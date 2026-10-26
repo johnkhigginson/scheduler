@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>How Scheduler works: create, share, vote, pick a date</title>
+<meta name="description" content="A walkthrough of Scheduler: making a poll, sharing the link, how people vote, how the best date is picked, and keeping your organizer link safe.">
+<link rel="canonical" href="https://scheduler.sdw.dev/how-it-works">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Scheduler">
+<meta property="og:title" content="How Scheduler works: create, share, vote, pick a date">
+<meta property="og:description" content="A walkthrough of Scheduler: making a poll, sharing the link, how people vote, how the best date is picked, and keeping your organizer link safe.">
+<meta property="og:url" content="https://scheduler.sdw.dev/how-it-works">
+<meta property="og:image" content="https://scheduler.sdw.dev/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How Scheduler works: create, share, vote, pick a date">
+<meta name="twitter:description" content="A walkthrough of Scheduler: making a poll, sharing the link, how people vote, how the best date is picked, and keeping your organizer link safe.">
+<meta name="twitter:image" content="https://scheduler.sdw.dev/og.png">
+<link rel="stylesheet" href="/app.css">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="site-header-inner">
+    <a class="wordmark" href="/">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="4.5" width="18" height="16" rx="2.5"></rect>
+        <path d="M3 9.5h18M8 2.5v4M16 2.5v4M9 14.5l2 2 4-4"></path>
+      </svg>
+      Scheduler
+      <span class="wordmark-sub">Pick a date everyone can actually make</span>
+    </a>
+    <nav class="site-nav">
+      <a href="/">New poll</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+
+<div class="card prose">
+  <h1>How Scheduler works</h1>
+  <p class="lede">Scheduler is a date poll. You offer some dates, share one link, everyone marks
+  which ones they can make, and the best date highlights itself. Here is every step, including the
+  parts most people only find when they need them.</p>
+
+  <div class="actions">
+    <a class="button" href="/?ref=how-it-works">Create a poll</a>
+    <span class="muted">No account needed, no ads.</span>
+  </div>
+
+  <h2>1. Create the poll</h2>
+  <p>Give it a title, then choose dates. There are several ways to do that, and they combine:</p>
+  <ul>
+    <li>Click days on the calendar. Click again to remove one, or shift click to add a run of days.
+    Days already past cannot be picked.</li>
+    <li>Use a preset: the next 7 days, weekdays next week, or the next 4 Fridays.</li>
+    <li>Repeat certain weekdays across a date range, such as every Tuesday and Thursday between two
+    dates, in one step.</li>
+  </ul>
+  <p>Then choose times. "All day" asks only about dates. Time slots ask about times as well: set
+  opening hours, such as 9:00 AM to 5:00 PM, and a slot length from 15 minutes to 4 hours, and every
+  chosen day gets those slots. Add a different window for certain days, such as shorter hours on
+  Saturday, and on those days it replaces the everyday hours. Tap any single slot in the list to
+  switch it off.</p>
+  <p>Last, decide whether people can answer "maybe" as well as yes and no. It is off by default.
+  Optionally add your name, some details, and a voting deadline. A poll can offer up to 300 dates
+  and times.</p>
+
+  <h2>2. Two links: one to share, one to keep</h2>
+  <p>Creating the poll gives you two links. The share link is for everyone. The organizer link is
+  for you: anyone holding it can change, close or delete the poll. Its secret sits after a
+  <code>#</code>, the part of a link browsers never send to a server, so it stays out of server
+  logs.</p>
+  <p>This browser remembers the organizer link, but nothing else does unless you save it. You can
+  copy it, download both links as a file, or have both emailed to you. That address is used for
+  that one email and not stored. If you would rather not type it in at all, open the links in your
+  own mail app instead.</p>
+
+  <h2>3. Everyone votes</h2>
+  <p>People open the share link, type a name and tap yes or no on each option, or maybe if you
+  allowed it. There is no account, no email address and no app. Options are grouped in one card per
+  day, and a shortcut line sets an answer for a whole weekday or start time at once. Tapping an
+  answer you already gave clears it.</p>
+  <p>Timed options show on each voter's own clock, with a switch to see them as the organizer
+  entered them. All day dates never move. A poll holds up to 60 people.</p>
+  <p>Voters can change their answers later from the same browser. Everyone can also leave
+  comments, and edit their own comments later the same way.</p>
+
+  <h2>4. The best date picks itself</h2>
+  <p>Each yes counts two points and each maybe one. The highest scoring date or time is highlighted
+  in the grid and named above it, along with how many people said yes. When options tie they are
+  all shown, and when lots of them are level the page names the earliest instead of listing them
+  all. "Add to calendar" downloads a calendar file for the winner.</p>
+
+  <h2>5. What the organizer link can do</h2>
+  <ul>
+    <li>Close voting, and reopen it later.</li>
+    <li>Turn "maybe" on or off, even after people have answered.</li>
+    <li>Add a date, with or without a time, or remove one. Removing a date also removes the answers
+    given on it, and the page warns you first.</li>
+    <li>Remove anyone's row or comment.</li>
+    <li>Delete the whole poll.</li>
+  </ul>
+  <p>If you set a deadline, voting closes on its own at that time and the poll page shows
+  everyone how long is left.</p>
+
+  <h2>6. Your polls on this device</h2>
+  <p>The home page lists the polls this browser created or opened with an organizer link, so you
+  can find them again without digging through messages. That list lives only in this browser.
+  Clearing site data removes it.</p>
+
+  <h2>7. Signing in, if you want to</h2>
+  <p>Accounts are optional and unlock nothing that a poll needs. Signing in keeps your polls on
+  any device. Enter your email address and Scheduler sends a sign in link that works once and
+  expires after 15 minutes. Polls you create while signed in appear on your My polls page. Open
+  that page in a browser that already holds organizer links, and those polls are added to your
+  account too, unless another account has them already.</p>
+
+  <h2>Who can see a poll</h2>
+  <p>Polls are private by link, not by password. Anyone with the share link can see the title,
+  details, dates, every name and answer, and the comments. Poll pages are kept out of search
+  engines. The <a href="/privacy">privacy page</a> lists everything Scheduler stores.</p>
+
+  <div class="actions">
+    <a class="button" href="/?ref=how-it-works">Create a poll</a>
+    <span class="muted">No account needed, no ads.</span>
+  </div>
+
+  <h2>Ideas for your first poll</h2>
+  <p>See <a href="/use-cases">what people use Scheduler for</a>, from D&amp;D sessions to family
+  reunions, or <a href="/use-cases#compare">how it compares</a> with Doodle, When2meet and others.</p>
+</div>
+
+</main>
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <strong>Scheduler</strong>
+    <span>Polls are private by link. No ads, no tracking.</span>
+    <nav class="footer-links" aria-label="Site">
+      <a href="/how-it-works">How it works</a>
+      <a href="/use-cases">Use cases</a>
+      <a href="/use-cases#compare">Compare</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+      <a href="https://github.com/johnkhigginson/scheduler">Source on GitHub</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="/account.js"></script>
+</body>
+</html>

@@ -137,7 +137,12 @@ app.MapGet("/p/{publicId}", async (string publicId, PollStore store) =>
 // every indexable page names its canonical URL.
 foreach (var page in new[]
 {
-    "privacy", "terms", "doodle-alternative", "when2meet-alternative", "framadate-alternative"
+    "privacy", "terms", "how-it-works", "use-cases",
+    "doodle-alternative", "when2meet-alternative", "framadate-alternative",
+    "rallly-alternative", "strawpoll-alternative", "crab-fit-alternative",
+    "dnd-session-scheduler", "book-club-date-poll", "family-reunion-date-poll",
+    "class-reunion-date-poll", "team-offsite-date-poll", "band-practice-scheduler",
+    "volunteer-meeting-poll", "bachelor-party-date-poll", "group-date-poll", "meeting-poll"
 })
     app.MapGet("/" + page, (HttpContext ctx) => SendPage(ctx, page + ".html"));
 
