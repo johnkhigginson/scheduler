@@ -29,6 +29,7 @@ Program.cs               endpoint definitions, top level statements
 Api.cs                   validation, auth, response shaping, option parsing, rate limit keys
 Auth.cs                  users, sign in links, sessions. Tokens stored as hashes
 Mailer.cs                the one email this app sends, through Postmark
+Site.cs                  canonical origin, support email placeholder, per poll share tags
 Models.cs                Mongo documents, request records, id generator
 PollStore.cs             Mongo collection access, index setup, every write
 appsettings.json         local defaults, connection string is overridden in Production
@@ -40,7 +41,13 @@ wwwroot/admin.html       every poll and its responses, behind one key
 wwwroot/signin.html      ask for a sign in link
 wwwroot/my.html          polls belonging to the signed in account
 wwwroot/app.css          all styling, CSS variables at the top
-tests/e2e.sh             102 checks, run against a throwaway database
+wwwroot/privacy.html     privacy page at /privacy. Keep it true to what the code stores
+wwwroot/terms.html       terms page at /terms
+wwwroot/404.html         served by the fallback for unknown non API GETs
+wwwroot/robots.txt       keeps crawlers off /p/ and private routes, lets link preview bots in
+wwwroot/sitemap.xml      static, list every indexable page here
+wwwroot/og.png           1200x630 share image; favicon.ico, favicon.svg, apple-touch-icon.png
+tests/e2e.sh             128 checks, run against a throwaway database
 deploy/                  systemd unit, Caddy block, bootstrap script
 .github/workflows/       build and test, then test and deploy
 ```
@@ -113,6 +120,21 @@ off, not open. It can read every poll on the server, so treat that key as a pass
 12. **`[hidden]` is enforced in CSS.** The attribute only carries `display:none` from the user agent
     sheet, so any class setting `display` beats it. That is how a legend stayed on screen for a poll
     that did not offer maybe. Twelve elements are toggled with `hidden`.
+
+## Pages, share tags and the support email
+
+`/p/{publicId}` is `poll.html` with the block between `<!-- share tags -->` markers replaced per
+poll by `Site.ShareTags`, from a projected read of title and description only. Every user value is
+HTML encoded there. Keep the markers or startup throws.
+
+Routing runs after static files (`app.UseRouting()` in `Program.cs`) so the catch all 404 page does
+not shadow `/` and real files. API and `/auth` paths keep their bare 404.
+
+There is no support email yet. `Site.SupportEmail` in `Site.cs` is the one placeholder, marked
+`TODO(john)`, and nothing renders it. Pages point people at GitHub issues instead. Never put any
+other address on the site.
+
+When the privacy page and the code disagree, the code is right and the page is a bug.
 
 ## Testing
 

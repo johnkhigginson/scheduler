@@ -95,7 +95,7 @@ polls. The app reads the real client address from `X-Forwarded-For`, which only 
 BASE_URL=http://127.0.0.1:5099 bash tests/e2e.sh
 ```
 
-102 checks. Point it at a throwaway database, never production; it creates and deletes real polls.
+128 checks. Point it at a throwaway database, never production; it creates and deletes real polls.
 Both workflows run it against a `mongo:7` service container, and the deploy job will not start
 unless it passes.
 
@@ -138,6 +138,18 @@ for the unit file, the Caddy block and the bootstrap script.
 - **Static assets have no fingerprint.** They are served `no-cache`, so the browser revalidates with
   the ETag and always gets current files at the cost of a 304. Fingerprinted filenames would avoid
   the round trip but need a build step, which this front end deliberately does not have.
+
+## Pages
+
+| Path | What |
+|---|---|
+| `/` | Create a poll |
+| `/p/{publicId}` | The poll. Title and link preview tags are filled in by the server |
+| `/signin`, `/my` | Optional account |
+| `/privacy`, `/terms` | Plain language privacy page and terms |
+| `/admin` | Site admin, behind `Admin__Key` |
+
+Unknown pages get a branded 404. `robots.txt` and `sitemap.xml` are static files in `wwwroot`.
 
 ## License
 

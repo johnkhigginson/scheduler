@@ -146,7 +146,10 @@ a { color: var(--accent); }
 }
 
 .site-footer strong { color: var(--ink); font-size: 13px; }
-.site-footer .spacer { margin-left: auto; }
+
+.footer-links { margin-left: auto; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.footer-links a { color: var(--muted); text-decoration: none; }
+.footer-links a:hover { color: var(--accent); text-decoration: underline; }
 
 .wrap {
   max-width: 1040px;
@@ -908,6 +911,16 @@ table.grid tfoot td { min-height: 0; height: 52px; }
 }
 
 .muted { color: var(--muted); font-size: 13px; }
+
+/* Long form text: privacy, terms and the 404 page. The h2 elsewhere is a small section label,
+   which reads wrongly as a heading in running prose. */
+.prose { max-width: 760px; }
+.prose h2 { font-size: 19px; text-transform: none; letter-spacing: -.2px; color: var(--ink); margin: 28px 0 8px; }
+.prose p, .prose li { max-width: 68ch; }
+.prose ul { padding-left: 20px; }
+.prose li + li { margin-top: 6px; }
+.prose code { font-size: 14px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; }
+.updated { color: var(--muted); font-size: 14px; margin: 0 0 18px; }
 .closed-banner { background: var(--maybe-bg) !important; color: var(--maybe) !important; border-color: var(--maybe) !important; }
 
 /* The picker is two columns only while there is genuinely room for two. */
@@ -983,7 +996,7 @@ table.grid tfoot td { min-height: 0; height: 52px; }
   .share input { font-size: 14px; }
 
   .site-footer-inner { font-size: 12px; }
-  .site-footer .spacer { margin-left: 0; }
+  .footer-links { margin-left: 0; width: 100%; }
 }
 
 /* Coarse pointers get the larger targets regardless of viewport width, which covers tablets. */

@@ -1,0 +1,24 @@
+# Poll pages are private by link and carry noindex, so search engines stay out of them.
+User-agent: *
+Disallow: /p/
+Disallow: /admin
+Disallow: /api/
+Disallow: /auth/
+Disallow: /my
+Disallow: /signin
+
+# Link preview bots are not search engines. Several honour robots.txt, so without this group a
+# shared poll link would unfurl with no title or image in chat apps.
+User-agent: Twitterbot
+User-agent: facebookexternalhit
+User-agent: LinkedInBot
+User-agent: Slackbot-LinkExpanding
+User-agent: Discordbot
+Allow: /p/
+Disallow: /admin
+Disallow: /api/
+Disallow: /auth/
+Disallow: /my
+Disallow: /signin
+
+Sitemap: https://scheduler.sdw.dev/sitemap.xml

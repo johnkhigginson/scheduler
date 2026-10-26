@@ -96,11 +96,31 @@ app.UseForwardedHeaders();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
+// Routing runs after static files on purpose. Left implicit it runs first, and the catch all 404
+// page below would then claim "/" and every real file before the static file middleware saw them.
+app.UseRouting();
 app.UseRateLimiter();
 
-// Pretty poll URL. The id is parsed client side from the path.
-app.MapGet("/p/{publicId}", (HttpContext ctx) =>
-    ctx.Response.SendFileAsync(Path.Combine(app.Environment.WebRootPath, "poll.html")));
+Task SendPage(HttpContext ctx, string file)
+{
+    ctx.Response.ContentType = "text/html; charset=utf-8";
+    return ctx.Response.SendFileAsync(Path.Combine(app.Environment.WebRootPath, file));
+}
+
+// Pretty poll URL. The id is parsed client side from the path; the server only fills in the title
+// and link preview tags, so a shared link unfurls with the poll's own name.
+var pollPage = Site.LoadPollPage(Path.Combine(app.Environment.WebRootPath, "poll.html"));
+app.MapGet("/p/{publicId}", async (string publicId, PollStore store) =>
+{
+    // An unknown id still gets the page, with generic tags. The script then says the poll is gone.
+    var poll = await store.GetShareInfoAsync(publicId);
+    return Results.Content(pollPage.Head + Site.ShareTags(poll) + pollPage.Tail, "text/html; charset=utf-8");
+});
+
+// Static pages at clean URLs. Each is also reachable as its .html file, which is harmless because
+// every indexable page names its canonical URL.
+foreach (var page in new[] { "privacy", "terms" })
+    app.MapGet("/" + page, (HttpContext ctx) => SendPage(ctx, page + ".html"));
 
 // Deploy health check. Returns 503 if Mongo is unreachable, so a bad deploy fails loudly.
 app.MapGet("/healthz", async (IMongoClient client) =>
@@ -120,8 +140,7 @@ app.MapGet("/healthz", async (IMongoClient client) =>
 
 // Admin area. The page itself is public, but it holds nothing until a valid key is supplied, and
 // every route below refuses without one.
-app.MapGet("/admin", (HttpContext ctx) =>
-    ctx.Response.SendFileAsync(Path.Combine(app.Environment.WebRootPath, "admin.html")));
+app.MapGet("/admin", (HttpContext ctx) => SendPage(ctx, "admin.html"));
 
 var site = app.MapGroup("/api/site");
 
@@ -194,11 +213,9 @@ site.MapDelete("/polls/{publicId}", async (string publicId, HttpContext ctx, Pol
 // Optional throughout. A poll made without signing in behaves exactly as it always has; an account
 // only adds a list of the polls you made.
 
-app.MapGet("/signin", (HttpContext ctx) =>
-    ctx.Response.SendFileAsync(Path.Combine(app.Environment.WebRootPath, "signin.html")));
+app.MapGet("/signin", (HttpContext ctx) => SendPage(ctx, "signin.html"));
 
-app.MapGet("/my", (HttpContext ctx) =>
-    ctx.Response.SendFileAsync(Path.Combine(app.Environment.WebRootPath, "my.html")));
+app.MapGet("/my", (HttpContext ctx) => SendPage(ctx, "my.html"));
 
 var auth = app.MapGroup("/api/auth");
 
@@ -520,5 +537,16 @@ api.MapDelete("/polls/{publicId}", async (string publicId, HttpContext ctx, Poll
     await store.DeleteAsync(poll.AdminId);
     return Results.Ok(new { ok = true });
 }).RequireRateLimiting(RateLimits.Writes);
+
+// Anything nothing else claimed. A person following a dead link gets a page with a way home; API and
+// auth callers, and any method other than GET, keep the bare 404 they always had.
+app.MapFallback("{*path}", async ctx =>
+{
+    ctx.Response.StatusCode = StatusCodes.Status404NotFound;
+    var path = ctx.Request.Path;
+    if (path.StartsWithSegments("/api") || path.StartsWithSegments("/auth")) return;
+    if (!HttpMethods.IsGet(ctx.Request.Method) && !HttpMethods.IsHead(ctx.Request.Method)) return;
+    await SendPage(ctx, "404.html");
+});
 
 app.Run();

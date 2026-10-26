@@ -42,6 +42,7 @@ IP4="-H X-Forwarded-For:10.$R1.$R2.44"
 # hour, and one run now makes more than that in total.
 IP5="-H X-Forwarded-For:10.$R1.$R2.55"
 IP6="-H X-Forwarded-For:10.$R1.$R2.66"
+IP7="-H X-Forwarded-For:10.$R1.$R2.77"
 
 echo "== validation on create =="
 is "reject poll with no title" "$(code POST /api/polls '{"Options":[{"Date":"2027-01-05"}]}' $IP1)" 400
@@ -289,6 +290,51 @@ is "a bogus sign in link is rejected" \
   "$(curl -s -o /dev/null -w '%{redirect_url}' --max-time 15 "$B/auth/verify?t=totallymadeup" $IP1 | grep -c 'signin?expired=1')" 1
 is "the sign in page loads" "$(code GET /signin '' $IP1)" 200
 is "the my polls page loads" "$(code GET /my '' $IP1)" 200
+
+echo
+echo "== site pages, search and share tags =="
+ctype() { curl -s -o /dev/null -w '%{content_type}' --max-time 15 "$B$1" $IP7 | cut -d';' -f1; }
+is "privacy page loads" "$(code GET /privacy '' $IP7)" 200
+body GET /privacy '' $IP7 | grep -q 'Last updated' && ok "privacy page has a date" || bad "privacy page has a date" "missing"
+is "terms page loads" "$(code GET /terms '' $IP7)" 200
+ROBOTS=$(body GET /robots.txt '' $IP7)
+echo "$ROBOTS" | grep -q '^Sitemap: https://scheduler.sdw.dev/sitemap.xml' && ok "robots names the sitemap" || bad "robots names the sitemap" "missing"
+echo "$ROBOTS" | grep -q '^Disallow: /p/' && ok "robots keeps crawlers off polls" || bad "robots keeps crawlers off polls" "missing"
+body GET /sitemap.xml '' $IP7 | grep -q '<loc>https://scheduler.sdw.dev/privacy</loc>' \
+  && ok "sitemap lists the privacy page" || bad "sitemap lists the privacy page" "missing"
+is "share image is served" "$(code GET /og.png '' $IP7)" 200
+is "share image is a png" "$(ctype /og.png)" "image/png"
+is "favicon is served" "$(code GET /favicon.ico '' $IP7)" 200
+is "touch icon is served" "$(code GET /apple-touch-icon.png '' $IP7)" 200
+
+HOME_HTML=$(body GET / '' $IP7)
+HOME_TITLE=$(echo "$HOME_HTML" | sed -n 's:.*<title>\(.*\)</title>.*:\1:p' | head -1)
+[ -n "$HOME_TITLE" ] && [ "$HOME_TITLE" != "Scheduler" ] && ok "home has a descriptive title" || bad "home has a descriptive title" "$HOME_TITLE"
+echo "$HOME_HTML" | grep -q 'og:image" content="https://scheduler.sdw.dev/og.png"' && ok "home has a share image" || bad "home has a share image" "missing"
+echo "$HOME_HTML" | grep -q '"@type": "WebApplication"' && ok "home has structured data" || bad "home has structured data" "missing"
+
+# The title carries markup on purpose: it has to come back encoded, never as live tags.
+SH=$(body POST /api/polls '{"Title":"Tom & Jerry <b>night</b>","Description":"Snacks \"provided\"","Options":[{"Date":"2027-05-01"}]}' $IP7)
+SHPUB=$(echo "$SH" | jget "['publicId']"); SHADM=$(echo "$SH" | jget "['adminId']")
+PAGE=$(body GET "/p/$SHPUB" '' $IP7)
+echo "$PAGE" | grep -qF '<meta property="og:title" content="Tom &amp; Jerry &lt;b&gt;night&lt;/b&gt;">' \
+  && ok "poll page share title is the encoded poll title" || bad "poll page share title is the encoded poll title" "not found"
+echo "$PAGE" | grep -qF '<title>Tom &amp; Jerry &lt;b&gt;night&lt;/b&gt; | Scheduler</title>' \
+  && ok "poll page title is the encoded poll title" || bad "poll page title is the encoded poll title" "not found"
+echo "$PAGE" | grep -qF 'content="Snacks &quot;provided&quot;"' && ok "poll description is encoded in the preview" || bad "poll description is encoded in the preview" "not found"
+echo "$PAGE" | grep -q '<b>night' && bad "no raw markup on the poll page" "found" || ok "no raw markup on the poll page"
+echo "$PAGE" | grep -qF '<meta name="robots" content="noindex, nofollow">' && ok "poll page is noindex" || bad "poll page is noindex" "missing"
+echo "$PAGE" | grep -qF "$SHADM" && bad "poll page never carries the organizer token" "leaked" || ok "poll page never carries the organizer token"
+is "unknown poll page still loads" "$(code GET /p/doesnotexist00 '' $IP7)" 200
+body GET /p/doesnotexist00 '' $IP7 | grep -qF '<meta property="og:title" content="A date poll on Scheduler">' \
+  && ok "unknown poll gets generic share tags" || bad "unknown poll gets generic share tags" "missing"
+code DELETE "/api/polls/$SHPUB" '' $IP3 -H "X-Admin-Token: $SHADM" >/dev/null
+
+is "unknown page is 404" "$(code GET /no-such-page '' $IP7)" 404
+is "unknown page is html" "$(ctype /no-such-page)" "text/html"
+body GET /no-such-page '' $IP7 | grep -q 'Page not found' && ok "unknown page says so" || bad "unknown page says so" "missing"
+is "unknown api route is still a bare 404" "$(code GET /api/no-such-route '' $IP7)" 404
+[ -z "$(body GET /api/no-such-route '' $IP7)" ] && ok "unknown api route has no html body" || bad "unknown api route has no html body" "got a body"
 
 echo
 echo "== concurrency =="

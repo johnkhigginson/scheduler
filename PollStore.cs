@@ -56,6 +56,18 @@ public sealed class PollStore
     public Task<Poll?> GetByPublicIdAsync(string publicId) =>
         _polls.Find(ByPublic(publicId)).FirstOrDefaultAsync()!;
 
+    /// <summary>
+    /// Just enough of a poll to fill in its link preview. The projection keeps a large poll cheap to
+    /// serve, and means the page render never even reads the organizer or edit tokens.
+    /// </summary>
+    public Task<Poll?> GetShareInfoAsync(string publicId) =>
+        _polls.Find(ByPublic(publicId))
+              .Project<Poll>(Builders<Poll>.Projection
+                  .Include(p => p.PublicId)
+                  .Include(p => p.Title)
+                  .Include(p => p.Description))
+              .FirstOrDefaultAsync()!;
+
     public Task<Poll?> GetByAdminIdAsync(string adminId) =>
         _polls.Find(p => p.AdminId == adminId).FirstOrDefaultAsync()!;
 
