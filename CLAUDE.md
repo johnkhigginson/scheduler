@@ -53,7 +53,7 @@ wwwroot/404.html         served by the fallback for unknown non API GETs
 wwwroot/robots.txt       keeps crawlers off /p/ and private routes, lets link preview bots in
 wwwroot/sitemap.xml      static, list every indexable page here
 wwwroot/og.png           1200x630 share image; favicon.ico, favicon.svg, apple-touch-icon.png
-tests/e2e.sh             149 checks, run against a throwaway database
+tests/e2e.sh             195 checks, run against a throwaway database
 tests/*.test.js          slots.js and zones.js under node. e2e.sh runs them and counts their checks
 deploy/                  systemd unit, Caddy block, bootstrap script
 tools/rebrand.sh         rewrites the product name in the static pages, site.js, Site.Name and tests

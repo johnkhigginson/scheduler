@@ -97,7 +97,8 @@ polls, 6 an hour for sign in links and 5 an hour for emailing poll links. The ap
 BASE_URL=http://127.0.0.1:5099 bash tests/e2e.sh
 ```
 
-149 checks. Point it at a throwaway database, never production; it creates and deletes real polls.
+195 checks. Point it at a throwaway database, never production; it creates and deletes real polls.
+The checks on create page slots and poll page time zones run under node, so node must be on the path.
 Both workflows run it against a `mongo:7` service container, and the deploy job will not start
 unless it passes.
 
