@@ -161,12 +161,9 @@
     });
   }
 
-  /// An instant such as the deadline, on the clock being shown and without seconds.
+  /// An instant such as the deadline or a comment's time, on the clock being shown.
   function formatInstant(date) {
-    return date.toLocaleString(undefined, {
-      weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
-      hour: 'numeric', minute: '2-digit', timeZoneName: 'short', timeZone: shownZone()
-    });
+    return Zones.formatInstant(date.getTime(), shownZone());
   }
 
   document.getElementById('tz-toggle').addEventListener('click', function (e) {
@@ -956,7 +953,7 @@
       var wrap = el('div', 'comment');
       var meta = el('div', 'meta');
       meta.appendChild(el('b', null, comment.name));
-      meta.appendChild(document.createTextNode('  ' + new Date(comment.createdUtc).toLocaleString()));
+      meta.appendChild(document.createTextNode('  ' + formatInstant(new Date(comment.createdUtc))));
 
       var body = el('div', 'body', comment.text);
 

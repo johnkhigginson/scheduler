@@ -37,4 +37,13 @@ is('converting to the same zone changes nothing',
 is('a real zone is valid', Zones.valid('Europe/Berlin'), true);
 is('a made up zone is not', Zones.valid('Not/AZone'), false);
 
+// 2026-11-01 07:30:45 UTC, the first 01:30 of that night in Denver, with seconds that must not show.
+var COMMENTED = Date.UTC(2026, 10, 1, 7, 30, 45);
+function shown(zone) { return Zones.formatInstant(COMMENTED, zone, 'en-US'); }
+is('an instant shows no seconds', /\d:\d\d:\d\d/.test(shown(DEN)), false);
+is('an instant reads on the voter clock', /7:30/.test(shown('UTC')), true);
+is('and on the organizer clock when switched', /1:30/.test(shown(DEN)), true);
+is('an instant names its zone', /MDT/.test(shown(DEN)), true);
+is('an instant keeps its date across midnight', /Oct 31/.test(shown('Pacific/Honolulu')), true);
+
 process.exit(failed ? 1 : 0);

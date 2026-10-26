@@ -1,7 +1,8 @@
 /*
   Moves a poll time between time zones. Option times are wall clock strings in the organizer's zone
   (Poll.TimeZone), so showing one in another zone means finding the instant it names there first.
-  Everything goes through Intl, which knows each zone's DST rules, rather than a fixed offset.
+  Everything goes through Intl, which knows each zone's DST rules, rather than a fixed offset. It
+  also formats instants such as the deadline, so they follow the same clock as the options.
   No DOM in here, so tests/zones.test.js runs it under node. In the browser it is the global Zones.
 */
 (function (root) {
@@ -52,7 +53,19 @@
     return wallClock(instantOf(date, time, from), to);
   }
 
-  var api = { valid: valid, wallClock: wallClock, instantOf: instantOf, convert: convert };
+  /// An instant such as the deadline or a comment's time, on zone's clock and without seconds.
+  /// An undefined zone means the device's own, and an undefined locale the browser's.
+  function formatInstant(ms, zone, locale) {
+    return new Date(ms).toLocaleString(locale, {
+      weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
+      hour: 'numeric', minute: '2-digit', timeZoneName: 'short', timeZone: zone
+    });
+  }
+
+  var api = {
+    valid: valid, wallClock: wallClock, instantOf: instantOf, convert: convert,
+    formatInstant: formatInstant
+  };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.Zones = api;
