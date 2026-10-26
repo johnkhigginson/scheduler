@@ -790,7 +790,19 @@ table.compare { border-collapse: collapse; width: 100%; background: var(--surfac
   user-select: none;
 }
 
-.cal-day.past { color: var(--muted); opacity: .5; }
+/*
+  Past days are disabled. The generic disabled style halves opacity, which on muted text fell well
+  under AA contrast, so these stay fully opaque: muted text on the calendar background is about 5:1.
+*/
+.cal-day:disabled,
+.cal-day:disabled:hover {
+  opacity: 1;
+  color: var(--muted);
+  background: transparent;
+  border-color: transparent;
+  font-weight: 400;
+  cursor: not-allowed;
+}
 .cal-day.today { box-shadow: inset 0 0 0 2px var(--best-line); }
 
 .cal-day.on {

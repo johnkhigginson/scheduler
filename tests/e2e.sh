@@ -409,6 +409,24 @@ rm -rf "$TMP"
 code DELETE "/api/polls/$CPUB" '' $IP3 -H "X-Admin-Token: $CADM" >/dev/null
 
 echo
+echo "== create page slot logic =="
+# The create page builds its options in the browser, so there is no API to call for this part.
+# slots.js has no DOM in it and runs under node. Denver puts a DST change inside the date checks.
+if command -v node >/dev/null 2>&1; then
+  SLOTS_OUT=$(TZ=America/Denver node "$(dirname "$0")/slots.test.js"); SLOTS_STATUS=$?
+  while IFS= read -r line; do
+    case "$line" in
+      "  PASS  "*) ok "${line#  PASS  }" ;;
+      "  FAIL  "*) rest=${line#  FAIL  }; bad "${rest%%   (*}" "${rest#*   (}" ;;
+    esac
+  done <<< "$SLOTS_OUT"
+  # A crash prints no FAIL line, so the exit status is checked as well.
+  [ "$SLOTS_STATUS" -eq 0 ] || echo "$SLOTS_OUT" | grep -q FAIL || bad "slot checks ran" "node exited $SLOTS_STATUS"
+else
+  bad "node is available for the slot checks" "node not found"
+fi
+
+echo
 echo "== cleanup =="
 for pair in "$PUB:$ADM" "$XPUB:$XADM" "$YPUB:$YADM" "$UPUB:$UADM"; do
   p=${pair%%:*}; a=${pair##*:}

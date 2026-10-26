@@ -2,7 +2,6 @@
   'use strict';
 
   var MAX_OPTIONS = 300;  // Must match Api.MaxOptions. The server truncates quietly past this.
-  var MAX_SLOTS_PER_DAY = 48;   // 15 minute slots across a 12 hour day
 
   var DURATIONS = [
     [15, '15 minutes'], [30, '30 minutes'], [45, '45 minutes'], [60, '1 hour'],
@@ -25,7 +24,8 @@
   var dropped = {};   // "iso|HH:mm" for individual slots switched off
 
   // A window is a set of opening hours and which weekdays it covers. One window covering every day
-  // is the common case. A second window is what lets Saturday run different hours to a weekday.
+  // is the common case. A second window is what lets Saturday run different hours to a weekday,
+  // and on the days it names it replaces the every day hours (see Slots.slotsForDow).
   var windows = [{ days: 'all', start: '09:00', end: '17:00', minutes: 60 }];
 
   var view = new Date();
@@ -78,44 +78,14 @@
     return checked ? checked.value : 'allday';
   }
 
-  function toMinutes(hhmm) {
-    if (!hhmm) return null;
-    var p = hhmm.split(':');
-    return (+p[0]) * 60 + (+p[1]);
-  }
+  var toMinutes = Slots.toMinutes;
+  var fromMinutes = Slots.fromMinutes;
+  var windowSlots = Slots.windowSlots;
 
-  function fromMinutes(m) {
-    return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
-  }
-
-  /// Slot starts inside one window, every one long enough to finish before closing time.
-  function windowSlots(w) {
-    var start = toMinutes(w.start);
-    var end = toMinutes(w.end);
-    if (start === null || end === null || !w.minutes || end <= start) return [];
-
-    var out = [];
-    for (var m = start; m + w.minutes <= end && out.length < MAX_SLOTS_PER_DAY; m += w.minutes) {
-      out.push(fromMinutes(m));
-    }
-    return out;
-  }
-
-  function windowCovers(w, dow) {
-    return w.days === 'all' || w.days.indexOf(dow) !== -1;
-  }
-
-  /// Every slot offered on one date, merged across whichever windows cover that weekday.
+  /// Every slot offered on one date.
   function slotsForDay(iso) {
     if (timeMode() !== 'window') return [null];
-
-    var dow = fromIso(iso).getDay();
-    var seen = {};
-    windows.forEach(function (w) {
-      if (!windowCovers(w, dow)) return;
-      windowSlots(w).forEach(function (t) { seen[t] = true; });
-    });
-    return Object.keys(seen).sort();
+    return Slots.slotsForDow(windows, fromIso(iso).getDay());
   }
 
   function buildOptions() {
@@ -201,6 +171,10 @@
         : 'This window does not fit a single slot.';
       if (!slots.length) note.classList.add('bad');
       card.appendChild(note);
+
+      if (w.days !== 'all' && windows.some(function (other) { return other.days === 'all'; })) {
+        card.appendChild(el('div', 'window-note', 'On these days, these hours replace the every day hours.'));
+      }
 
       if (windows.length > 1) {
         var remove = el('button', 'link', 'Remove this window');
@@ -311,7 +285,9 @@
       var button = document.createElement('button');
       button.type = 'button';
       button.className = 'cal-day' + (iso in days ? ' on' : '') +
-        (iso === today ? ' today' : '') + (iso < today ? ' past' : '');
+        (iso === today ? ' today' : '');
+      // A poll for a day already gone helps nobody, so past days cannot be picked at all.
+      button.disabled = iso < today;
       button.textContent = String(day);
       button.setAttribute('data-iso', iso);
       button.setAttribute('aria-pressed', iso in days ? 'true' : 'false');
@@ -340,9 +316,10 @@
       var cursor = fromIso(from);
       var last = fromIso(to);
       var guard = 0;
+      var today = todayIso();
       // Shift click always adds, so it can never wipe a selection by accident.
       while (cursor <= last && guard++ < 400) {
-        days[isoDate(cursor)] = true;
+        if (isoDate(cursor) >= today) days[isoDate(cursor)] = true;
         cursor.setDate(cursor.getDate() + 1);
       }
     } else {
@@ -455,10 +432,8 @@
         days[isoDate(new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i))] = true;
       }
     },
-    month: function () {
-      var d = nextDow(5);
-      var month = d.getMonth();
-      while (d.getMonth() === month) { days[isoDate(d)] = true; d.setDate(d.getDate() + 7); }
+    fridays: function () {
+      Slots.nextWeekdays(new Date(), 5, 4).forEach(function (d) { days[isoDate(d)] = true; });
     }
   };
 
@@ -492,9 +467,10 @@
     showError('');
     var cursor = fromIso(from);
     var last = fromIso(to);
+    var today = todayIso();
     var guard = 0;
     while (cursor <= last && guard++ < 400) {
-      if (dows[String(cursor.getDay())]) days[isoDate(cursor)] = true;
+      if (dows[String(cursor.getDay())] && isoDate(cursor) >= today) days[isoDate(cursor)] = true;
       cursor.setDate(cursor.getDate() + 1);
     }
     var first = chosen()[0];

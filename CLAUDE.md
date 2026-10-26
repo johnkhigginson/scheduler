@@ -34,7 +34,8 @@ Models.cs                Mongo documents, request records, id generator
 PollStore.cs             Mongo collection access, index setup, every write
 appsettings.json         local defaults, connection string is overridden in Production
 wwwroot/index.html       create a poll
-wwwroot/create.js        calendar, weekday ranges, time windows, slot generation
+wwwroot/create.js        calendar, weekday ranges, time windows, presets
+wwwroot/slots.js         slot generation and weekday dates, DOM free so node can test it
 wwwroot/poll.html        vote, comment, organizer controls
 wwwroot/poll.js
 wwwroot/admin.html       every poll and its responses, behind one key
@@ -52,6 +53,7 @@ wwwroot/robots.txt       keeps crawlers off /p/ and private routes, lets link pr
 wwwroot/sitemap.xml      static, list every indexable page here
 wwwroot/og.png           1200x630 share image; favicon.ico, favicon.svg, apple-touch-icon.png
 tests/e2e.sh             149 checks, run against a throwaway database
+tests/slots.test.js      slots.js under node. e2e.sh runs it and counts its checks
 deploy/                  systemd unit, Caddy block, bootstrap script
 tools/rebrand.sh         rewrites the product name in the static pages, site.js, Site.Name and tests
 .github/workflows/       build and test, then test and deploy
