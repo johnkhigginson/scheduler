@@ -166,6 +166,12 @@ copies it beside the confirmation after a vote, so hiding that one element hides
 
 When the privacy page and the code disagree, the code is right and the page is a bug.
 
+The privacy page says the operator may occasionally count requests from a copy of the Caddy access
+log, offline and aggregate only, and that the browser gets no analytics scripts, analytics cookies or
+trackers. Site copy says "no trackers" or "no analytics scripts", never a bare "no analytics" or "no
+tracking". Adding anything that runs in the browser to measure usage means rewriting that page and
+every footer first.
+
 ## Rebrand checklist
 
 The product name is changing, so it lives in as few places as possible. Running
