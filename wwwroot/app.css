@@ -478,6 +478,45 @@ table.grid tr.fresh > th, table.grid tr.fresh > td { background: var(--accent-so
 
 .tag.closed { background: var(--maybe-bg); color: var(--maybe); }
 
+/* The voter facing call to action on poll pages. Quiet on purpose. */
+.made-with { text-align: center; font-size: 14px; color: var(--muted); margin: 28px 0 0; }
+.made-with a { font-weight: 600; }
+.made-with.after-vote {
+  text-align: left;
+  margin: 0 0 14px;
+  padding: 11px 13px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+/* Comparison pages. */
+a.button {
+  display: inline-block;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  padding: 12px 18px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  box-shadow: 0 1px 2px rgba(16, 32, 43, .12);
+}
+a.button:hover { background: var(--accent-hover); }
+
+.compare-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  margin: 10px 0 8px;
+}
+table.compare { border-collapse: collapse; width: 100%; background: var(--surface); font-size: 15px; }
+.compare th, .compare td { text-align: left; vertical-align: top; padding: 11px 13px; border-bottom: 1px solid var(--line); }
+.compare thead th { background: var(--surface-2); font-size: 13px; color: var(--muted); }
+.compare tbody th { font-weight: 600; width: 34%; }
+.compare tr:last-child th, .compare tr:last-child td { border-bottom: 0; }
+.compare td.us { background: var(--best-bg); }
+.as-of { font-size: 13px; color: var(--muted); margin: 0; }
+
 /* Polls remembered in this browser, on the home page. */
 .device-poll {
   display: flex;
@@ -1013,6 +1052,7 @@ table.grid tfoot td { min-height: 0; height: 52px; }
 
   .site-footer-inner { font-size: 12px; }
   .footer-links { margin-left: 0; width: 100%; }
+  .compare th, .compare td { padding: 9px 10px; font-size: 14px; }
 }
 
 /* Coarse pointers get the larger targets regardless of viewport width, which covers tablets. */

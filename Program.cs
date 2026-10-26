@@ -130,7 +130,10 @@ app.MapGet("/p/{publicId}", async (string publicId, PollStore store) =>
 
 // Static pages at clean URLs. Each is also reachable as its .html file, which is harmless because
 // every indexable page names its canonical URL.
-foreach (var page in new[] { "privacy", "terms" })
+foreach (var page in new[]
+{
+    "privacy", "terms", "doodle-alternative", "when2meet-alternative", "framadate-alternative"
+})
     app.MapGet("/" + page, (HttpContext ctx) => SendPage(ctx, page + ".html"));
 
 // Deploy health check. Returns 503 if Mongo is unreachable, so a bad deploy fails loudly.

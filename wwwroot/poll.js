@@ -230,6 +230,9 @@
     description.textContent = poll.description || '';
     description.hidden = !poll.description;
 
+    // Shown to voters only. The organizer already found the site.
+    document.getElementById('made-with').hidden = !!poll.isAdmin;
+
     document.getElementById('closed-banner').hidden = !poll.closed;
     document.getElementById('share-link').value = location.origin + '/p/' + poll.publicId;
 
@@ -926,12 +929,25 @@
       editing = null;
       await load();
       notice('Saved. Your availability is on the board.', 'ok');
+      showMadeWithAfterVote();
     } catch (err) {
       notice(err.message, 'error');
     } finally {
       button.disabled = false;
       button.textContent = label;
     }
+  }
+
+  // Repeats the footer call to action beside the confirmation, the moment someone has just seen how
+  // quick this was. It copies the footer element, so hiding that one hides this too.
+  function showMadeWithAfterVote() {
+    var source = document.getElementById('made-with');
+    if (source.hidden || document.getElementById('made-with-voted')) return;
+    var copy = source.cloneNode(true);
+    copy.id = 'made-with-voted';
+    copy.className = 'made-with after-vote';
+    var anchor = document.getElementById('notice');
+    anchor.parentNode.insertBefore(copy, anchor.nextSibling);
   }
 
   async function deleteParticipant(participant) {

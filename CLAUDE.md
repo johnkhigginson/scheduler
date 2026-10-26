@@ -43,11 +43,14 @@ wwwroot/my.html          polls belonging to the signed in account
 wwwroot/app.css          all styling, CSS variables at the top
 wwwroot/privacy.html     privacy page at /privacy. Keep it true to what the code stores
 wwwroot/terms.html       terms page at /terms
+wwwroot/*-alternative.html  Doodle, When2meet and Framadate comparison pages at clean URLs.
+                         Competitor facts are dated October 2026; every Scheduler claim must be
+                         true of the code
 wwwroot/404.html         served by the fallback for unknown non API GETs
 wwwroot/robots.txt       keeps crawlers off /p/ and private routes, lets link preview bots in
 wwwroot/sitemap.xml      static, list every indexable page here
 wwwroot/og.png           1200x630 share image; favicon.ico, favicon.svg, apple-touch-icon.png
-tests/e2e.sh             135 checks, run against a throwaway database
+tests/e2e.sh             149 checks, run against a throwaway database
 deploy/                  systemd unit, Caddy block, bootstrap script
 .github/workflows/       build and test, then test and deploy
 ```
@@ -139,6 +142,9 @@ not shadow `/` and real files. API and `/auth` paths keep their bare 404.
 There is no support email yet. `Site.SupportEmail` in `Site.cs` is the one placeholder, marked
 `TODO(john)`, and nothing renders it. Pages point people at GitHub issues instead. Never put any
 other address on the site.
+
+Poll pages show voters one "Made with Scheduler" line, `#made-with` in `poll.html`. `poll.js`
+copies it beside the confirmation after a vote, so hiding that one element hides both.
 
 When the privacy page and the code disagree, the code is right and the page is a bug.
 

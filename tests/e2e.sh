@@ -332,6 +332,18 @@ body GET /p/doesnotexist00 '' $IP7 | grep -qF '<meta property="og:title" content
   && ok "unknown poll gets generic share tags" || bad "unknown poll gets generic share tags" "missing"
 code DELETE "/api/polls/$SHPUB" '' $IP3 -H "X-Admin-Token: $SHADM" >/dev/null
 
+for slug in doodle-alternative when2meet-alternative framadate-alternative; do
+  is "$slug page loads" "$(code GET "/$slug" '' $IP7)" 200
+  ALT=$(body GET "/$slug" '' $IP7)
+  echo "$ALT" | grep -qF "<link rel=\"canonical\" href=\"https://scheduler.sdw.dev/$slug\">" \
+    && ok "$slug names its canonical url" || bad "$slug names its canonical url" "missing"
+  echo "$ALT" | grep -qF "href=\"/?ref=$slug\"" && ok "$slug links to create a poll" || bad "$slug links to create a poll" "missing"
+  body GET /sitemap.xml '' $IP7 | grep -qF "<loc>https://scheduler.sdw.dev/$slug</loc>" \
+    && ok "sitemap lists $slug" || bad "sitemap lists $slug" "missing"
+done
+echo "$HOME_HTML" | grep -qF 'href="/when2meet-alternative"' && ok "footer links the comparison pages" || bad "footer links the comparison pages" "missing"
+body GET /p/doesnotexist00 '' $IP7 | grep -qF 'href="/?ref=poll"' && ok "poll pages carry the made with link" || bad "poll pages carry the made with link" "missing"
+
 is "unknown page is 404" "$(code GET /no-such-page '' $IP7)" 404
 is "unknown page is html" "$(ctype /no-such-page)" "text/html"
 body GET /no-such-page '' $IP7 | grep -q 'Page not found' && ok "unknown page says so" || bad "unknown page says so" "missing"

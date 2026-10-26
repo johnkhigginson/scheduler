@@ -97,7 +97,7 @@ polls, 6 an hour for sign in links and 5 an hour for emailing poll links. The ap
 BASE_URL=http://127.0.0.1:5099 bash tests/e2e.sh
 ```
 
-135 checks. Point it at a throwaway database, never production; it creates and deletes real polls.
+149 checks. Point it at a throwaway database, never production; it creates and deletes real polls.
 Both workflows run it against a `mongo:7` service container, and the deploy job will not start
 unless it passes.
 
@@ -149,6 +149,7 @@ for the unit file, the Caddy block and the bootstrap script.
 | `/p/{publicId}` | The poll. Title and link preview tags are filled in by the server |
 | `/signin`, `/my` | Optional account |
 | `/privacy`, `/terms` | Plain language privacy page and terms |
+| `/doodle-alternative`, `/when2meet-alternative`, `/framadate-alternative` | Comparison pages |
 | `/admin` | Site admin, behind `Admin__Key` |
 
 Unknown pages get a branded 404. `robots.txt` and `sitemap.xml` are static files in `wwwroot`.
