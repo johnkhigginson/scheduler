@@ -59,8 +59,8 @@
     <li>No ads, no analytics, no tracking pixels, no third-party scripts or fonts. Every file the
     site loads comes from scheduler.sdw.dev.</li>
     <li>You do not need an account to create a poll or to vote.</li>
-    <li>Nothing is sold or shared. The only outside service that sees any of your data is Postmark,
-    and only when Scheduler sends you an email.</li>
+    <li>Nothing is sold or shared. Two service providers handle data on Scheduler's behalf:
+    Postmark, which delivers email, and MongoDB Atlas, which hosts the database.</li>
   </ul>
 
   <h2>What a poll stores</h2>
@@ -116,9 +116,11 @@
   <h2>IP addresses and logs</h2>
   <p>To limit abuse, the server counts requests that change something (creating a poll, voting,
   commenting, asking for a sign in link) per IP address. Those counts are kept in memory only, last
-  an hour at most, and are never written to the database. Scheduler does not keep access logs of
-  visits. Its error log can include an email address when an email fails to send. That log stays on
-  the server and is only used to fix problems.</p>
+  an hour at most, and are never written to the database. Scheduler runs no analytics and does not
+  build profiles of visitors. The server and the app may keep short-lived technical logs, such as
+  request errors, for troubleshooting. Those logs are not used for tracking. The error log can
+  include an email address when an email fails to send. That log stays on the server and is only
+  used to fix problems.</p>
 
   <h2>Who can see what</h2>
   <ul>
