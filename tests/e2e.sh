@@ -345,6 +345,11 @@ echo "$HOME_HTML" | grep -qF 'href="/when2meet-alternative"' && ok "footer links
 body GET /p/doesnotexist00 '' $IP7 | grep -qF 'href="/?ref=poll"' && ok "poll pages carry the made with link" || bad "poll pages carry the made with link" "missing"
 
 is "unknown page is 404" "$(code GET /no-such-page '' $IP7)" 404
+# Every HTML response names its charset, the routed pages and the static files alike.
+for page in /p/doesnotexist00 /my /admin /signin /privacy /terms /doodle-alternative / /privacy.html /no-such-page; do
+  is "$page is served as utf-8 html" \
+    "$(curl -s -o /dev/null -w '%{content_type}' --max-time 15 "$B$page" $IP7)" "text/html; charset=utf-8"
+done
 is "unknown page is html" "$(ctype /no-such-page)" "text/html"
 body GET /no-such-page '' $IP7 | grep -q 'Page not found' && ok "unknown page says so" || bad "unknown page says so" "missing"
 is "unknown api route is still a bare 404" "$(code GET /api/no-such-route '' $IP7)" 404

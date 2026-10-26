@@ -19,6 +19,9 @@ public static class Site
     /// </summary>
     public const string Origin = "https://scheduler.sdw.dev";
 
+    /// <summary>Every HTML response carries this, whether it is routed or a static file.</summary>
+    public const string HtmlContentType = "text/html; charset=utf-8";
+
     // TODO(john): support email. Empty on purpose, and rendered nowhere while it is. The privacy
     // and terms pages point people at GitHub issues until a real address exists.
     public const string SupportEmail = "";

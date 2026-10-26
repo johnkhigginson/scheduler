@@ -6,6 +6,7 @@ using DraftPoll;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.StaticFiles;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -106,7 +107,11 @@ Api.SiteAdminKey = builder.Configuration["Admin:Key"];
 app.UseForwardedHeaders();
 
 app.UseDefaultFiles();
-app.UseStaticFiles();
+// The routed pages below name their charset in the header, and the home page and every .html file
+// get the same, so no HTML response leaves the browser to guess its encoding.
+var contentTypes = new FileExtensionContentTypeProvider();
+contentTypes.Mappings[".html"] = Site.HtmlContentType;
+app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = contentTypes });
 // Routing runs after static files on purpose. Left implicit it runs first, and the catch all 404
 // page below would then claim "/" and every real file before the static file middleware saw them.
 app.UseRouting();
@@ -114,7 +119,7 @@ app.UseRateLimiter();
 
 Task SendPage(HttpContext ctx, string file)
 {
-    ctx.Response.ContentType = "text/html; charset=utf-8";
+    ctx.Response.ContentType = Site.HtmlContentType;
     return ctx.Response.SendFileAsync(Path.Combine(app.Environment.WebRootPath, file));
 }
 
@@ -125,7 +130,7 @@ app.MapGet("/p/{publicId}", async (string publicId, PollStore store) =>
 {
     // An unknown id still gets the page, with generic tags. The script then says the poll is gone.
     var poll = await store.GetShareInfoAsync(publicId);
-    return Results.Content(pollPage.Head + Site.ShareTags(poll) + pollPage.Tail, "text/html; charset=utf-8");
+    return Results.Content(pollPage.Head + Site.ShareTags(poll) + pollPage.Tail, Site.HtmlContentType);
 });
 
 // Static pages at clean URLs. Each is also reachable as its .html file, which is harmless because
