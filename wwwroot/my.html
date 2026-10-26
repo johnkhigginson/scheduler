@@ -31,33 +31,31 @@
   </div>
 </header>
 
-<div class="wrap" id="main">
+<main class="wrap" id="main">
 
   <div id="notice" class="notice" hidden aria-live="polite"></div>
 
-  <div class="card" id="signed-out" hidden>
+  <div class="card">
     <h1>My polls</h1>
-    <p class="lede">Sign in to see the polls you have made.</p>
-    <div class="actions"><a href="/signin"><button type="button" class="primary">Sign in</button></a></div>
-  </div>
-
-  <div id="dash" hidden>
-    <div class="card">
-      <h1>My polls</h1>
+    <div id="signed-out" hidden>
+      <p class="lede">Sign in to see the polls you have made.</p>
+      <div class="actions"><a href="/signin"><button type="button" class="primary">Sign in</button></a></div>
+    </div>
+    <div id="dash-head" hidden>
       <p class="lede" id="who"></p>
       <div class="actions" style="margin-top:0">
         <a href="/"><button type="button" class="primary">New poll</button></a>
         <button type="button" id="signout">Sign out</button>
       </div>
     </div>
-
-    <div class="card">
-      <h2>Polls</h2>
-      <div id="poll-list"></div>
-    </div>
   </div>
 
-</div>
+  <div class="card" id="dash" hidden>
+    <h2>Polls</h2>
+    <div id="poll-list"></div>
+  </div>
+
+</main>
 
 <footer class="site-footer">
   <div class="site-footer-inner">

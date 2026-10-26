@@ -57,7 +57,7 @@
   </div>
 </header>
 
-<div class="wrap" id="main">
+<main class="wrap" id="main">
 
   <div class="hero">
     <span class="eyebrow">Scheduling, without the group chat</span>
@@ -73,7 +73,7 @@
   </div>
 
   <div class="card" id="form-card">
-    <h1>New poll</h1>
+    <h2 class="h1">New poll</h2>
     <p class="lede">Add your candidate dates, share the link, let everyone mark yes or no. Maybe is optional.</p>
 
     <div id="error" class="notice error" hidden></div>
@@ -182,11 +182,11 @@
   </div>
 
   <div class="card" id="done-card" hidden>
-    <h1>Poll created</h1>
+    <h2 class="h1">Poll created</h2>
     <p class="lede">Save the admin link somewhere safe. It is the only way back into the admin controls.</p>
 
     <div class="field">
-      <label>Share this link</label>
+      <label for="public-link">Share this link</label>
       <div class="share">
         <input type="text" id="public-link" readonly>
         <button type="button" data-copy="public-link">Copy</button>
@@ -194,7 +194,7 @@
     </div>
 
     <div class="field">
-      <label>Organizer link (keep private)</label>
+      <label for="admin-link">Organizer link (keep private)</label>
       <div class="share">
         <input type="text" id="admin-link" readonly>
         <button type="button" data-copy="admin-link">Copy</button>
@@ -233,7 +233,7 @@
     </div>
   </div>
 
-</div>
+</main>
 
 <footer class="site-footer">
   <div class="site-footer-inner">

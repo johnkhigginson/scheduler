@@ -157,6 +157,13 @@ a { color: var(--accent); }
   padding: 28px 16px 8px;
 }
 
+/*
+  The poll arrives after the page does. With nothing to hold the space, the footer sat in view under
+  the loading notice and was shoved off screen when the poll landed, a layout shift of about 0.7.
+  A full screen of room keeps the footer below the fold until then.
+*/
+.poll-page { min-height: calc(100vh - var(--header-h)); }
+
 /* Kept for any markup still using the old brand block. */
 .brand { display: flex; align-items: baseline; gap: 10px; margin-bottom: 20px; }
 .brand strong { font-size: 18px; letter-spacing: -.2px; }
@@ -207,6 +214,9 @@ a { color: var(--accent); }
 h1 { font-size: 25px; margin: 0 0 6px; letter-spacing: -.5px; }
 h2 { font-size: 13px; margin: 0 0 14px; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); }
 p.lede { margin: 0 0 18px; color: var(--muted); }
+
+/* A card title on a page whose one h1 is already elsewhere. Looks like an h1, ranks as an h2. */
+h2.h1 { font-size: 25px; margin: 0 0 6px; letter-spacing: -.5px; text-transform: none; color: var(--ink); }
 
 label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
 

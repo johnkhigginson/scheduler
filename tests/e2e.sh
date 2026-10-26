@@ -346,6 +346,16 @@ echo "$HOME_HTML" | grep -qF 'href="/when2meet-alternative"' && ok "footer links
 body GET /p/doesnotexist00 '' $IP7 | grep -qF 'href="/?ref=poll"' && ok "poll pages carry the made with link" || bad "poll pages carry the made with link" "missing"
 
 is "unknown page is 404" "$(code GET /no-such-page '' $IP7)" 404
+# One main landmark and one h1 per page. Pages that swap views share a single h1 rather than
+# carrying one per view.
+for page in / /p/doesnotexist00 /my /admin /signin /privacy /terms /doodle-alternative \
+            /when2meet-alternative /framadate-alternative /no-such-page; do
+  HTML=$(body GET "$page" '' $IP7)
+  is "$page has one main and one h1" \
+    "$(echo "$HTML" | grep -o '<main[ >]' | wc -l | tr -d ' ')/$(echo "$HTML" | grep -o '<h1[ >]' | wc -l | tr -d ' ')" "1/1"
+done
+body GET /p/doesnotexist00 '' $IP7 | grep -qF 'id="share-link" readonly aria-label=' \
+  && ok "the poll share link has a label" || bad "the poll share link has a label" "missing"
 # Every HTML response names its charset, the routed pages and the static files alike.
 for page in /p/doesnotexist00 /my /admin /signin /privacy /terms /doodle-alternative / /privacy.html /no-such-page; do
   is "$page is served as utf-8 html" \

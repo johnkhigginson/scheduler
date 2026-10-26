@@ -68,6 +68,7 @@
         document.getElementById('sent-to').textContent = 'We sent a sign in link to ' + value + '.';
         show('ask', false);
         show('sent', true);
+        document.getElementById('signin-title').textContent = 'Check your email';
         // sent:false means the server could not hand the mail to Postmark. Saying so beats letting
         // someone wait for an email that was never sent.
         if (result && result.sent === false) {
@@ -87,7 +88,11 @@
     emailInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') request(); });
 
     var again = document.getElementById('again');
-    if (again) again.addEventListener('click', function () { show('sent', false); show('ask', true); });
+    if (again) again.addEventListener('click', function () {
+      show('sent', false);
+      show('ask', true);
+      document.getElementById('signin-title').textContent = 'Sign in';
+    });
   }
 
   // ---------- my polls page ----------
@@ -159,6 +164,7 @@
       var data = await api('/polls');
       if (!data) { show('signed-out', true); return; }
       renderPolls(data);
+      show('dash-head', true);
       show('dash', true);
     })();
 

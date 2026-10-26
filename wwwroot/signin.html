@@ -31,37 +31,39 @@
   </div>
 </header>
 
-<div class="wrap" id="main">
+<main class="wrap" id="main">
 
-  <div class="card" id="ask">
-    <h1>Sign in</h1>
-    <p class="lede">Enter your email and we will send a link. No password to choose, none to forget.</p>
+  <div class="card">
+    <h1 id="signin-title">Sign in</h1>
 
-    <div id="expired" class="notice error" hidden>
-      That link had already been used, or it expired. Ask for a fresh one.
+    <div id="ask">
+      <p class="lede">Enter your email and we will send a link. No password to choose, none to forget.</p>
+
+      <div id="expired" class="notice error" hidden>
+        That link had already been used, or it expired. Ask for a fresh one.
+      </div>
+      <div id="error" class="notice error" hidden></div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" autocomplete="email" spellcheck="false" placeholder="you@example.com">
+      </div>
+
+      <div class="actions">
+        <button type="button" id="send" class="primary">Send me a link</button>
+      </div>
+      <p class="muted" style="margin:12px 0 0">An account only keeps a list of the polls you make.
+      You never need one to create a poll or to vote.</p>
     </div>
-    <div id="error" class="notice error" hidden></div>
 
-    <div class="field">
-      <label for="email">Email</label>
-      <input type="email" id="email" autocomplete="email" spellcheck="false" placeholder="you@example.com">
+    <div id="sent" hidden>
+      <p class="lede" id="sent-to"></p>
+      <p>The link works once and expires in 15 minutes. If it does not arrive, check spam, then
+      <button type="button" id="again" class="link">try again</button>.</p>
     </div>
-
-    <div class="actions">
-      <button type="button" id="send" class="primary">Send me a link</button>
-    </div>
-    <p class="muted" style="margin:12px 0 0">An account only keeps a list of the polls you make.
-    You never need one to create a poll or to vote.</p>
   </div>
 
-  <div class="card" id="sent" hidden>
-    <h1>Check your email</h1>
-    <p class="lede" id="sent-to"></p>
-    <p>The link works once and expires in 15 minutes. If it does not arrive, check spam, then
-    <button type="button" id="again" class="link">try again</button>.</p>
-  </div>
-
-</div>
+</main>
 
 <footer class="site-footer">
   <div class="site-footer-inner">
