@@ -375,13 +375,6 @@ api.MapGet("/polls/{publicId}", async (string publicId, HttpContext ctx, PollSto
     return poll is null ? Results.NotFound() : Results.Ok(Api.Shape(poll, Api.IsAdmin(ctx, poll)));
 });
 
-// Resolve an admin token to its poll so the admin link can redirect.
-api.MapGet("/admin/{adminId}", async (string adminId, PollStore store) =>
-{
-    var poll = await store.GetByAdminIdAsync(adminId);
-    return poll is null ? Results.NotFound() : Results.Ok(new { publicId = poll.PublicId });
-});
-
 // Add a participant row. The edit token is returned once and only once.
 api.MapPost("/polls/{publicId}/participants", async (
     string publicId, ParticipantRequest req, HttpContext ctx, PollStore store) =>

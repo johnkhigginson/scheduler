@@ -68,9 +68,6 @@ public sealed class PollStore
                   .Include(p => p.Description))
               .FirstOrDefaultAsync()!;
 
-    public Task<Poll?> GetByAdminIdAsync(string adminId) =>
-        _polls.Find(p => p.AdminId == adminId).FirstOrDefaultAsync()!;
-
     public Task DeleteAsync(string adminId) =>
         _polls.DeleteOneAsync(p => p.AdminId == adminId);
 

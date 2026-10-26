@@ -71,7 +71,6 @@ the browser that voted. The poll page says so at the point of voting.
 |---|---|---|
 | POST | `/api/polls` | none |
 | GET | `/api/polls/{publicId}` | none |
-| GET | `/api/admin/{adminId}` | admin token in path |
 | POST | `/api/polls/{id}/email-links` | organizer token in the body |
 | POST | `/api/polls/{id}/participants` | none |
 | PUT | `/api/polls/{id}/participants/{pid}` | `X-Edit-Token` or `X-Admin-Token` |
@@ -97,7 +96,7 @@ polls, 6 an hour for sign in links and 5 an hour for emailing poll links. The ap
 BASE_URL=http://127.0.0.1:5099 bash tests/e2e.sh
 ```
 
-307 checks. Point it at a throwaway database, never production; it creates and deletes real polls.
+305 checks. Point it at a throwaway database, never production; it creates and deletes real polls.
 The checks on create page slots and poll page time zones run under node, so node must be on the path.
 Both workflows run it against a `mongo:7` service container, and the deploy job will not start
 unless it passes.

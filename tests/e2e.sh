@@ -64,8 +64,6 @@ G=$(body GET "/api/polls/$PUB" '' $IP1)
 is "duplicate date option deduped" "$(echo "$G" | jget "['options'].__len__()")" 2
 echo "$G" | grep -qiE '"adminId"|"editToken"' && bad "GET hides secrets" "leaked" || ok "GET hides secrets"
 is "GET unknown poll is 404" "$(code GET /api/polls/doesnotexist00 '' $IP1)" 404
-is "admin token resolves to poll" "$(body GET "/api/admin/$ADM" '' $IP1 | jget "['publicId']")" "$PUB"
-is "unknown admin token is 404" "$(code GET /api/admin/nope '' $IP1)" 404
 
 OPT1=$(echo "$G" | jget "['options'][0]['id']")
 OPT2=$(echo "$G" | jget "['options'][1]['id']")

@@ -59,7 +59,7 @@ wwwroot/404.html         served by the fallback for unknown non API GETs
 wwwroot/robots.txt       keeps crawlers off /p/ and private routes, lets link preview bots in
 wwwroot/sitemap.xml      static, list every indexable page here
 wwwroot/og.png           1200x630 share image; favicon.ico, favicon.svg, apple-touch-icon.png
-tests/e2e.sh             307 checks, run against a throwaway database
+tests/e2e.sh             305 checks, run against a throwaway database
 tests/*.test.js          slots.js and zones.js under node. e2e.sh runs them and counts their checks
 deploy/                  systemd unit, Caddy block, bootstrap script
 tools/rebrand.sh         rewrites the product name in the static pages, site.js, Site.Name and tests
@@ -126,7 +126,8 @@ off, not open. It can read every poll on the server, so treat that key as a pass
    consciously whether it belongs in `Shape`.
 6. **The admin token travels in the URL fragment**, `/p/{publicId}#a={adminId}`. Fragments are not
    sent to the server, so it stays out of access logs and `Referer` headers. Never move it into the
-   query string or a path segment.
+   query string or a path segment. There is no route that takes it in the path: the old
+   `GET /api/admin/{adminId}` was removed because no page or link ever called it.
 7. **Tokens are compared with `CryptographicOperations.FixedTimeEquals`**, padded to a fixed width so
    length does not leak. Do not replace this with `==`.
 8. **All user text is rendered with `textContent`, never `innerHTML`.** The one `innerHTML` is in
