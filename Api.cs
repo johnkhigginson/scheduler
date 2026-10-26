@@ -9,6 +9,7 @@ public static class RateLimits
     public const string Writes = "writes";
     public const string Create = "create";
     public const string SignIn = "signin";
+    public const string EmailLinks = "emaillinks";
 
     /// <summary>
     /// Partition key for the limiters. This is the real caller only because UseForwardedHeaders
@@ -86,8 +87,13 @@ public static class Api
 
     public static bool IsAdmin(HttpContext ctx, Poll poll) =>
         ctx.Request.Headers.TryGetValue("X-Admin-Token", out var token)
+        && IsAdminToken(token.ToString(), poll);
+
+    /// <summary>For the one route that carries the organizer token in a request body.</summary>
+    public static bool IsAdminToken(string? token, Poll poll) =>
+        !string.IsNullOrEmpty(token)
         && !string.IsNullOrEmpty(poll.AdminId)
-        && FixedTimeEquals(token.ToString(), poll.AdminId);
+        && FixedTimeEquals(token, poll.AdminId);
 
     public static bool HasEditToken(HttpContext ctx, string expected) =>
         ctx.Request.Headers.TryGetValue("X-Edit-Token", out var token)

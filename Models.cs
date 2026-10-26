@@ -133,3 +133,6 @@ public sealed record UpdatePollRequest(
 public sealed record AddOptionsRequest(List<OptionInput>? Options);
 
 public sealed record CommentEditRequest(string? Text);
+
+/// <summary>The organizer token rides in the body, never the URL, so it stays out of access logs.</summary>
+public sealed record EmailLinksRequest(string? AdminId, string? Email);

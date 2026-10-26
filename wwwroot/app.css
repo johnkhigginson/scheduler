@@ -478,6 +478,20 @@ table.grid tr.fresh > th, table.grid tr.fresh > td { background: var(--accent-so
 
 .tag.closed { background: var(--maybe-bg); color: var(--maybe); }
 
+/* Polls remembered in this browser, on the home page. */
+.device-poll {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.device-poll:first-child { border-top: 0; padding-top: 0; }
+.device-poll-main { flex: 1 1 auto; min-width: 0; }
+.device-poll-main a { font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
+.device-poll-main a:hover { text-decoration: underline; }
+.device-poll-meta { font-size: 13px; color: var(--muted); }
+
 @media (max-width: 620px) {
   .poll-row { flex-direction: column; align-items: stretch; gap: 8px; }
   .poll-row-counts { gap: 4px 12px; }
@@ -909,6 +923,8 @@ table.grid tfoot td { min-height: 0; height: 52px; }
   font-size: 13px;
   background: var(--surface-2);
 }
+/* An address, not a link, and iOS zooms on anything under 16px. */
+.share input[type=email] { font-family: inherit; font-size: 16px; }
 
 .muted { color: var(--muted); font-size: 13px; }
 
@@ -982,7 +998,7 @@ table.grid tfoot td { min-height: 0; height: 52px; }
   /* iOS zooms the whole page when a focused field is under 16px. Select counts too. */
   input[type=text], input[type=password], input[type=search], input[type=tel],
   input[type=date], input[type=time], input[type=datetime-local],
-  input[type=number], textarea, select {
+  input[type=number], input[type=email], input[type=url], textarea, select {
     font-size: 16px;
   }
 

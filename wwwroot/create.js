@@ -517,6 +517,7 @@
 
   var created = false;
   var linksSaved = false;
+  var createdPoll = null;   // { publicId, adminId, title } once the server has made it
 
   function markSaved() { linksSaved = true; document.getElementById('unsaved-warning').hidden = true; }
 
@@ -524,6 +525,73 @@
     return 'Scheduler poll: ' + title + '\n\n' +
       'Share this link with everyone:\n' + publicUrl + '\n\n' +
       'Organizer link, keep this private. It is the only way back into the controls:\n' + adminUrl + '\n';
+  }
+
+  // ---------- polls remembered on this device ----------
+  // admin:<publicId> holding the bare organizer token is the format poll.js and the account claim
+  // already read, so it stays exactly as it was. The title and created time sit beside it under
+  // poll:<publicId>, which older entries simply lack.
+
+  function store(key, value) {
+    try {
+      if (value === undefined) return localStorage.getItem(key);
+      if (value === null) localStorage.removeItem(key);
+      else localStorage.setItem(key, value);
+    } catch (e) { /* private mode, nothing persists */ }
+    return null;
+  }
+
+  function devicePolls() {
+    var list = [];
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var key = localStorage.key(i);
+        if (!key || key.indexOf('admin:') !== 0) continue;
+        var publicId = key.slice('admin:'.length);
+        var adminId = localStorage.getItem(key);
+        if (!publicId || !adminId) continue;
+
+        var meta = {};
+        try { meta = JSON.parse(localStorage.getItem('poll:' + publicId)) || {}; } catch (e) { /* bad entry */ }
+        list.push({ publicId: publicId, adminId: adminId, title: meta.title || null, created: meta.created || null });
+      }
+    } catch (e) { /* private mode */ }
+
+    // Newest first. Entries saved before titles were kept have no date and sort last.
+    return list.sort(function (a, b) { return (b.created || '').localeCompare(a.created || ''); });
+  }
+
+  function renderDevicePolls() {
+    var polls = devicePolls();
+    var card = document.getElementById('device-polls');
+    var list = document.getElementById('device-poll-list');
+    list.textContent = '';
+    card.hidden = !polls.length;
+
+    polls.forEach(function (p) {
+      var row = el('div', 'device-poll');
+      var main = el('div', 'device-poll-main');
+      var link = el('a', null, p.title || 'Poll ' + p.publicId);
+      link.href = '/p/' + p.publicId + '#a=' + p.adminId;
+      main.appendChild(link);
+      main.appendChild(el('div', 'device-poll-meta', p.created
+        ? 'Created ' + new Date(p.created).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+        : 'Open it once to show its title here'));
+      row.appendChild(main);
+
+      var forget = el('button', 'link', 'Forget');
+      forget.type = 'button';
+      forget.setAttribute('aria-label', 'Forget ' + (p.title || 'this poll') + ' on this device');
+      forget.addEventListener('click', function () {
+        if (!confirm('Forget this poll on this device? The poll itself stays. You will need the ' +
+          'organizer link from somewhere else to get back into its controls.')) return;
+        store('admin:' + p.publicId, null);
+        store('poll:' + p.publicId, null);
+        renderDevicePolls();
+      });
+      row.appendChild(forget);
+      list.appendChild(row);
+    });
   }
 
   window.addEventListener('beforeunload', function (e) {
@@ -596,6 +664,13 @@
       var data = await res.json();
       if (!res.ok) { showError(data.error || 'Something went wrong.'); return; }
 
+      // Saved before anything else, so the organizer link survives even if this tab is closed
+      // before any of the buttons below are pressed.
+      store('admin:' + data.publicId, data.adminId);
+      store('poll:' + data.publicId, JSON.stringify({ title: title, created: new Date().toISOString() }));
+      createdPoll = { publicId: data.publicId, adminId: data.adminId };
+      renderDevicePolls();
+
       var base = location.origin + '/p/' + data.publicId;
       var adminUrl = base + '#a=' + data.adminId;
       document.getElementById('public-link').value = base;
@@ -626,12 +701,76 @@
         markSaved();
       });
 
+      showKeepPrompt();
       document.getElementById('done-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (err) {
       showError('Could not reach the server. Try again.');
     } finally {
       button.disabled = false;
     }
+  });
+
+  // ---------- after creating: email the links, offer an account ----------
+
+  // Signing in adds every poll this browser holds an organizer token for to the account, through
+  // the existing claim on /my. So this only has to point at sign in, and only when it would help.
+  async function showKeepPrompt() {
+    try {
+      var res = await fetch('/api/auth/me');
+      var me = await res.json();
+      document.getElementById('keep-poll').hidden = !!me.signedIn;
+    } catch (err) { /* the prompt is optional */ }
+  }
+
+  function emailStatus(message, kind) {
+    var box = document.getElementById('email-status');
+    box.className = 'notice ' + kind;
+    box.textContent = message;
+    box.hidden = false;
+  }
+
+  async function sendLinks() {
+    var input = document.getElementById('email-to');
+    var button = document.getElementById('email-send');
+    var address = input.value.trim();
+    if (!createdPoll) return;
+    if (!address || address.indexOf('@') < 1) {
+      emailStatus('Enter an email address.', 'error');
+      input.focus();
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = 'Sending...';
+    try {
+      // The organizer token goes in the body. In the path or query it would land in access logs.
+      var res = await fetch('/api/polls/' + createdPoll.publicId + '/email-links', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminId: createdPoll.adminId, email: address })
+      });
+      var data = null;
+      try { data = await res.json(); } catch (e) { /* no body */ }
+
+      if (!res.ok) {
+        emailStatus((data && data.error) || 'Could not send that. Copy your links instead.', 'error');
+      } else if (data && data.sent) {
+        emailStatus('Sent to ' + address + '. If it does not arrive, check spam.', 'ok');
+        markSaved();
+      } else {
+        emailStatus('Email is not available right now. Copy or download your links instead.', 'error');
+      }
+    } catch (err) {
+      emailStatus('Could not reach the server. Copy your links instead.', 'error');
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Send';
+    }
+  }
+
+  document.getElementById('email-send').addEventListener('click', sendLinks);
+  document.getElementById('email-to').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') sendLinks();
   });
 
   document.addEventListener('click', function (e) {
@@ -667,4 +806,5 @@
   })();
 
   redraw();
+  renderDevicePolls();
 })();

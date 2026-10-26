@@ -65,6 +65,13 @@
     <p>Add your candidate dates, share one link, and let everyone mark yes or no. No sign up needed, no app to install.</p>
   </div>
 
+  <div class="card" id="device-polls" hidden>
+    <h2>Your polls on this device</h2>
+    <div id="device-poll-list"></div>
+    <p class="muted" style="margin:10px 0 0">This list lives only in this browser. Clearing site data
+    removes it. <a href="/signin">Sign in</a> to keep your polls on any device.</p>
+  </div>
+
   <div class="card" id="form-card">
     <h1>New poll</h1>
     <p class="lede">Add your candidate dates, share the link, let everyone mark yes or no. Maybe is optional.</p>
@@ -195,13 +202,30 @@
       <p class="muted">Anyone with this link can rename, close or delete the poll.</p>
       <div class="actions" style="margin-top:10px">
         <button type="button" id="save-links">Download both links</button>
-        <a id="email-links" href="#">Email them to yourself</a>
       </div>
     </div>
 
+    <div class="field">
+      <label for="email-to">Email me both links</label>
+      <div class="share">
+        <input type="email" id="email-to" autocomplete="email" spellcheck="false" placeholder="Your email address">
+        <button type="button" id="email-send">Send</button>
+      </div>
+      <div id="email-status" class="notice" hidden aria-live="polite"></div>
+      <p class="muted" style="margin:0">Used for this one email and not stored. Or
+      <a id="email-links" href="#">open them in your own mail app</a>.</p>
+    </div>
+
     <div class="notice warn-box" id="unsaved-warning">
-      There is no way to recover the organizer link. It is not stored anywhere else, and it is not
-      tied to an account. Copy it, download it or mail it to yourself before you close this tab.
+      This browser remembers the organizer link, but nothing else does unless you sign in. Clear
+      your site data or switch devices and it is gone. Copy it, download it or email it to yourself
+      before you close this tab.
+    </div>
+
+    <div class="notice info" id="keep-poll" hidden>
+      <strong>Sign in to keep this poll.</strong> Sign in with your email and this poll is added to
+      your account, so you can reach it from any device. Open the sign in email in this browser.
+      <div class="actions" style="margin-top:10px"><a href="/signin"><button type="button">Sign in</button></a></div>
     </div>
 
     <div class="actions">

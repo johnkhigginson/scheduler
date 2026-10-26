@@ -28,7 +28,7 @@ DraftPoll.csproj
 Program.cs               endpoint definitions, top level statements
 Api.cs                   validation, auth, response shaping, option parsing, rate limit keys
 Auth.cs                  users, sign in links, sessions. Tokens stored as hashes
-Mailer.cs                the one email this app sends, through Postmark
+Mailer.cs                the two emails this app sends (sign in link, poll links), through Postmark
 Site.cs                  canonical origin, support email placeholder, per poll share tags
 Models.cs                Mongo documents, request records, id generator
 PollStore.cs             Mongo collection access, index setup, every write
@@ -47,7 +47,7 @@ wwwroot/404.html         served by the fallback for unknown non API GETs
 wwwroot/robots.txt       keeps crawlers off /p/ and private routes, lets link preview bots in
 wwwroot/sitemap.xml      static, list every indexable page here
 wwwroot/og.png           1200x630 share image; favicon.ico, favicon.svg, apple-touch-icon.png
-tests/e2e.sh             128 checks, run against a throwaway database
+tests/e2e.sh             135 checks, run against a throwaway database
 deploy/                  systemd unit, Caddy block, bootstrap script
 .github/workflows/       build and test, then test and deploy
 ```
@@ -80,7 +80,13 @@ Accounts never gate anything. A poll made with no account behaves exactly as it 
 test asserts it. `Poll.OwnerEmail` is null for those.
 
 Auth lives in `Auth.cs`: users, sign in links and sessions. Tokens are stored as SHA-256 hashes,
-never raw. Sending is in `Mailer.cs`, one message type, no SDK.
+never raw. Sending is in `Mailer.cs`, two message types, no SDK. The poll links email
+(`POST /api/polls/{id}/email-links`, organizer token in the body) must never store or log the
+address it sends to.
+
+The browser remembers organizer links as `admin:{publicId}` holding the bare token, which `poll.js`
+and the claim on `/my` both read, plus `poll:{publicId}` holding `{ title, created }` for the home
+page list. Do not change the `admin:` format.
 
 The admin area is one key in `Admin__Key`, compared in constant time, sent in a header. Unset means
 off, not open. It can read every poll on the server, so treat that key as a password.

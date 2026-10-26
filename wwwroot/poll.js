@@ -235,7 +235,12 @@
 
     var adminCard = document.getElementById('admin-card');
     adminCard.hidden = !poll.isAdmin;
-    if (poll.isAdmin) renderAdmin();
+    if (poll.isAdmin) {
+      renderAdmin();
+      // Keeps the home page list of this device's polls named and dated, including polls that
+      // were remembered before that list existed.
+      store('poll:' + PUBLIC_ID, JSON.stringify({ title: poll.title, created: poll.createdUtc }));
+    }
 
     renderNotes();
     renderGrid();
@@ -1029,6 +1034,7 @@
     try {
       await api('DELETE', '/polls/' + PUBLIC_ID);
       store('admin:' + PUBLIC_ID, null);
+      store('poll:' + PUBLIC_ID, null);
       store('me:' + PUBLIC_ID, null);
       location.href = '/';
     } catch (err) {

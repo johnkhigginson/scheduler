@@ -1,12 +1,13 @@
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace DraftPoll;
 
 /// <summary>
-/// Sends the sign in email through Postmark. Deliberately tiny: one message type, no templates, no
-/// SDK. An unset token disables sending rather than failing at the call site, so the app still runs
-/// locally without credentials.
+/// Sends email through Postmark. Deliberately tiny: two message types, no templates, no SDK. An unset
+/// token disables sending rather than failing at the call site, so the app still runs locally without
+/// credentials.
 /// </summary>
 public sealed class Mailer
 {
@@ -43,11 +44,49 @@ public sealed class Mailer
             "<p>It works once and expires in 15 minutes. If you did not ask for it, ignore this email.</p>" +
             "<p style=\"color:#5c6b7a;font-size:13px\">" + link + "</p>";
 
+        return await SendAsync(to, "Your Scheduler sign in link", text, html, "sign in", logBody: true);
+    }
+
+    /// <summary>
+    /// The share link and organizer link for a poll that was just made. Nothing about this send is
+    /// stored, so the address is kept out of the log too: logging it would make the log the one
+    /// place that remembers it.
+    /// </summary>
+    public async Task<bool> SendPollLinksAsync(string to, string title, string publicUrl, string adminUrl)
+    {
+        if (!Enabled)
+        {
+            _log.LogWarning("No Postmark token configured, so a poll links email was not sent.");
+            return false;
+        }
+
+        var text =
+            "Your Scheduler poll: " + title + "\n\n" +
+            "Share this link with everyone:\n" + publicUrl + "\n\n" +
+            "Organizer link, keep this private. It is the only way back into the controls:\n" + adminUrl +
+            "\n\nYou asked for this email on the page that created the poll. If you did not, ignore it.\n";
+
+        // The title is user text, so it is encoded before it goes anywhere near the HTML body.
+        var safeTitle = WebUtility.HtmlEncode(title);
+        var html =
+            "<p>Your Scheduler poll: <strong>" + safeTitle + "</strong></p>" +
+            "<p>Share this link with everyone:<br><a href=\"" + publicUrl + "\">" + publicUrl + "</a></p>" +
+            "<p>Organizer link, keep this private. It is the only way back into the controls:<br>" +
+            "<a href=\"" + adminUrl + "\">" + adminUrl + "</a></p>" +
+            "<p style=\"color:#5c6b7a;font-size:13px\">You asked for this email on the page that created the poll. If you did not, ignore it.</p>";
+
+        // A line break in a subject is not valid, and a title can carry one.
+        var subject = "Your Scheduler poll links: " + title.ReplaceLineEndings(" ");
+        return await SendAsync(to, subject, text, html, "poll links", logBody: false);
+    }
+
+    private async Task<bool> SendAsync(string to, string subject, string text, string html, string kind, bool logBody)
+    {
         var payload = JsonSerializer.Serialize(new
         {
             From = _from,
             To = to,
-            Subject = "Your Scheduler sign in link",
+            Subject = subject,
             TextBody = text,
             HtmlBody = html,
             MessageStream = "outbound"
@@ -64,14 +103,15 @@ public sealed class Mailer
             if (response.IsSuccessStatusCode) return true;
 
             // The body carries Postmark's reason, such as an unverified sender signature, which is
-            // the failure worth seeing in the log.
-            var body = await response.Content.ReadAsStringAsync();
-            _log.LogError("Postmark refused the sign in email: {Status} {Body}", (int)response.StatusCode, body);
+            // the failure worth seeing in the log. It can also quote the recipient, so it is left out
+            // for sends whose address is meant to leave no trace.
+            var body = logBody ? await response.Content.ReadAsStringAsync() : "(body not logged)";
+            _log.LogError("Postmark refused the {Kind} email: {Status} {Body}", kind, (int)response.StatusCode, body);
             return false;
         }
         catch (Exception ex)
         {
-            _log.LogError(ex, "Could not reach Postmark to send a sign in email.");
+            _log.LogError(ex, "Could not reach Postmark to send a {Kind} email.", kind);
             return false;
         }
     }

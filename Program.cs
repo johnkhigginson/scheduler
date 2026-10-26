@@ -64,13 +64,24 @@ builder.Services.AddRateLimiter(o =>
             QueueLimit = 0
         }));
 
-    // Sign in links send real email to an address the caller chose, so this is the tightest of the
-    // three. It caps how much mail one address or one host can cause.
+    // Sign in links send real email to an address the caller chose, so this is far tighter than the
+    // ordinary writes. It caps how much mail one address or one host can cause.
     o.AddPolicy(RateLimits.SignIn, ctx => RateLimitPartition.GetFixedWindowLimiter(
         RateLimits.ClientKey(ctx),
         _ => new FixedWindowRateLimiterOptions
         {
             PermitLimit = 6,
+            Window = TimeSpan.FromHours(1),
+            QueueLimit = 0
+        }));
+
+    // Same reasoning as sign in: it mails an address the caller chose. It also needs the organizer
+    // token of a real poll, so a legitimate organizer never gets near five an hour.
+    o.AddPolicy(RateLimits.EmailLinks, ctx => RateLimitPartition.GetFixedWindowLimiter(
+        RateLimits.ClientKey(ctx),
+        _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
             Window = TimeSpan.FromHours(1),
             QueueLimit = 0
         }));
@@ -324,6 +335,25 @@ api.MapPost("/polls", async (CreatePollRequest req, HttpContext ctx, PollStore s
     await store.InsertAsync(poll);
     return Results.Ok(new { publicId = poll.PublicId, adminId = poll.AdminId });
 }).RequireRateLimiting(RateLimits.Create);
+
+// Mail both links to the organizer. The address is used for this one send and never stored.
+api.MapPost("/polls/{publicId}/email-links", async (
+    string publicId, EmailLinksRequest req, HttpContext ctx, PollStore store, Mailer mailer) =>
+{
+    var poll = await store.GetByPublicIdAsync(publicId);
+    if (poll is null) return Results.NotFound();
+    if (!Api.IsAdminToken(req.AdminId, poll)) return Results.StatusCode(StatusCodes.Status403Forbidden);
+
+    var email = AuthStore.CleanEmail(req.Email);
+    if (email is null) return Results.BadRequest(new { error = "That does not look like an email address." });
+
+    var publicUrl = $"{ctx.Request.Scheme}://{ctx.Request.Host}/p/{poll.PublicId}";
+    var sent = await mailer.SendPollLinksAsync(email, poll.Title, publicUrl, publicUrl + "#a=" + poll.AdminId);
+
+    // sent:false covers both a missing Postmark token and a refused send. Either way the page tells
+    // the organizer to copy the links instead.
+    return Results.Ok(new { sent });
+}).RequireRateLimiting(RateLimits.EmailLinks);
 
 // Read a poll.
 api.MapGet("/polls/{publicId}", async (string publicId, HttpContext ctx, PollStore store) =>

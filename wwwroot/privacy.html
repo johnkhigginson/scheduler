@@ -87,7 +87,9 @@
   <h2>Email</h2>
   <p>Scheduler sends email through <a href="https://postmarkapp.com">Postmark</a>. When you ask for a
   sign in link, your email address and the link are sent to Postmark so it can deliver the message.
-  Postmark keeps its own delivery records under its own privacy policy. Scheduler sends no
+  When you use "Email me both links" after creating a poll, your email address, the poll title and
+  both links are sent to Postmark the same way. Scheduler does not store that address, and does not
+  write it to its logs. Postmark keeps its own delivery records under its own privacy policy. Scheduler sends no
   newsletters and no marketing email.</p>
 
   <h2>Cookies and browser storage</h2>
@@ -99,6 +101,8 @@
   <ul>
     <li><code>admin:</code> followed by a poll id: the organizer token for a poll you created, or
     opened with its organizer link.</li>
+    <li><code>poll:</code> followed by a poll id: that poll's title and when it was created, so the
+    home page can list "Your polls on this device".</li>
     <li><code>me:</code> followed by a poll id: which row in that poll is yours, and its edit
     token.</li>
     <li><code>comments:</code> followed by a poll id: edit tokens for your comments.</li>

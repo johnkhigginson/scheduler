@@ -43,6 +43,8 @@ IP4="-H X-Forwarded-For:10.$R1.$R2.44"
 IP5="-H X-Forwarded-For:10.$R1.$R2.55"
 IP6="-H X-Forwarded-For:10.$R1.$R2.66"
 IP7="-H X-Forwarded-For:10.$R1.$R2.77"
+# The email links limiter allows 5 an hour, so that section gets an address nothing else uses.
+IP8="-H X-Forwarded-For:10.$R1.$R2.88"
 
 echo "== validation on create =="
 is "reject poll with no title" "$(code POST /api/polls '{"Options":[{"Date":"2027-01-05"}]}' $IP1)" 400
@@ -335,6 +337,27 @@ is "unknown page is html" "$(ctype /no-such-page)" "text/html"
 body GET /no-such-page '' $IP7 | grep -q 'Page not found' && ok "unknown page says so" || bad "unknown page says so" "missing"
 is "unknown api route is still a bare 404" "$(code GET /api/no-such-route '' $IP7)" 404
 [ -z "$(body GET /api/no-such-route '' $IP7)" ] && ok "unknown api route has no html body" || bad "unknown api route has no html body" "got a body"
+
+echo
+echo "== email me my links =="
+EL=$(body POST /api/polls '{"Title":"links by mail","Options":[{"Date":"2027-05-02"}]}' $IP7)
+ELPUB=$(echo "$EL" | jget "['publicId']"); ELADM=$(echo "$EL" | jget "['adminId']")
+is "a wrong organizer token is refused" \
+  "$(code POST "/api/polls/$ELPUB/email-links" '{"AdminId":"not-the-token","Email":"someone@example.org"}' $IP8)" 403
+is "no organizer token is refused" \
+  "$(code POST "/api/polls/$ELPUB/email-links" '{"Email":"someone@example.org"}' $IP8)" 403
+is "a junk address is refused" \
+  "$(code POST "/api/polls/$ELPUB/email-links" "{\"AdminId\":\"$ELADM\",\"Email\":\"nope\"}" $IP8)" 400
+# The suite runs with no Postmark token, so the right answer is a clean "not sent", not an error.
+is "with email off the send reports not sent" \
+  "$(body POST "/api/polls/$ELPUB/email-links" "{\"AdminId\":\"$ELADM\",\"Email\":\"someone@example.org\"}" $IP8 | jget "['sent']")" "False"
+body GET "/api/polls/$ELPUB" '' $IP7 | grep -q 'someone@example.org' && bad "the address is not stored on the poll" "found" || ok "the address is not stored on the poll"
+code POST "/api/polls/$ELPUB/email-links" "{\"AdminId\":\"$ELADM\",\"Email\":\"someone@example.org\"}" $IP8 >/dev/null
+is "email links is rate limited" \
+  "$(code POST "/api/polls/$ELPUB/email-links" "{\"AdminId\":\"$ELADM\",\"Email\":\"someone@example.org\"}" $IP8)" 429
+is "email links for an unknown poll is 404" \
+  "$(code POST /api/polls/doesnotexist00/email-links '{"AdminId":"x","Email":"someone@example.org"}' $IP7)" 404
+code DELETE "/api/polls/$ELPUB" '' $IP3 -H "X-Admin-Token: $ELADM" >/dev/null
 
 echo
 echo "== concurrency =="

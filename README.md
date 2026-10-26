@@ -56,9 +56,10 @@ The admin token sits in the URL fragment on purpose. Fragments are never sent to
 secret stays out of access logs and `Referer` headers. The browser stores it in `localStorage` the
 first time and strips it from the address bar.
 
-**The organizer link cannot be recovered.** It is not stored anywhere else and is not tied to an
-account. The success screen offers a download and a mailto, and warns before the tab is closed with
-it unsaved.
+**The organizer link cannot be recovered.** Outside this browser it is not stored anywhere and is
+not tied to an account unless you sign in. The browser saves it the moment the poll is created and
+the home page lists the polls it holds. The success screen also offers a download, an "email me both
+links" form, and a sign in prompt, and warns before the tab is closed with the link unsaved.
 
 Each person who adds a row gets a one time edit token, also in `localStorage`. That is what lets
 them come back and change their own row without an account, and it is why editing only works from
@@ -71,6 +72,7 @@ the browser that voted. The poll page says so at the point of voting.
 | POST | `/api/polls` | none |
 | GET | `/api/polls/{publicId}` | none |
 | GET | `/api/admin/{adminId}` | admin token in path |
+| POST | `/api/polls/{id}/email-links` | organizer token in the body |
 | POST | `/api/polls/{id}/participants` | none |
 | PUT | `/api/polls/{id}/participants/{pid}` | `X-Edit-Token` or `X-Admin-Token` |
 | DELETE | `/api/polls/{id}/participants/{pid}` | `X-Edit-Token` or `X-Admin-Token` |
@@ -86,7 +88,7 @@ Best-date scoring is `yes * 2 + maybe`. Ties are shown as ties. Maybe is off by 
 drops a maybe vote on a poll that did not enable it.
 
 Write endpoints are rate limited per IP: 30 a minute for ordinary writes, 10 an hour for creating
-polls. The app reads the real client address from `X-Forwarded-For`, which only works because
+polls, 6 an hour for sign in links and 5 an hour for emailing poll links. The app reads the real client address from `X-Forwarded-For`, which only works because
 `UseForwardedHeaders` runs before the limiter.
 
 ## Tests
@@ -95,7 +97,7 @@ polls. The app reads the real client address from `X-Forwarded-For`, which only 
 BASE_URL=http://127.0.0.1:5099 bash tests/e2e.sh
 ```
 
-128 checks. Point it at a throwaway database, never production; it creates and deletes real polls.
+135 checks. Point it at a throwaway database, never production; it creates and deletes real polls.
 Both workflows run it against a `mongo:7` service container, and the deploy job will not start
 unless it passes.
 
