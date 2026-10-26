@@ -38,6 +38,7 @@ wwwroot/create.js        calendar, weekday ranges, time windows, presets
 wwwroot/slots.js         slot generation and weekday dates, DOM free so node can test it
 wwwroot/poll.html        vote, comment, organizer controls
 wwwroot/poll.js
+wwwroot/zones.js         converts option times between zones with Intl, DOM free so node can test it
 wwwroot/admin.html       every poll and its responses, behind one key
 wwwroot/signin.html      ask for a sign in link
 wwwroot/my.html          polls belonging to the signed in account
@@ -53,7 +54,7 @@ wwwroot/robots.txt       keeps crawlers off /p/ and private routes, lets link pr
 wwwroot/sitemap.xml      static, list every indexable page here
 wwwroot/og.png           1200x630 share image; favicon.ico, favicon.svg, apple-touch-icon.png
 tests/e2e.sh             149 checks, run against a throwaway database
-tests/slots.test.js      slots.js under node. e2e.sh runs it and counts its checks
+tests/*.test.js          slots.js and zones.js under node. e2e.sh runs them and counts their checks
 deploy/                  systemd unit, Caddy block, bootstrap script
 tools/rebrand.sh         rewrites the product name in the static pages, site.js, Site.Name and tests
 .github/workflows/       build and test, then test and deploy
@@ -104,6 +105,8 @@ off, not open. It can read every poll on the server, so treat that key as a pass
    `HH:mm`. Do not "improve" this into a `DateTime`. The moment a date option round trips through a
    timezone it lands on the wrong day for somebody. `DeadlineUtc` is a real instant, which is why it
    is the one `DateTime` here.
+   The poll page shows timed options on the voter's clock by converting through `zones.js` at display
+   time only, with a switch back to the organizer's zone. All day options never move.
 2. **Never write a poll back whole.** Every write uses a targeted operator: `$push`, `$pull`, or a
    positional `$set`. Replacing the document loses concurrent edits, and did: ten simultaneous rows
    once persisted four, with all ten callers getting 200.

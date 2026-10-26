@@ -956,6 +956,17 @@ table.grid tfoot td { min-height: 0; height: 52px; }
 
 .row-tools { display: inline-flex; gap: 2px; margin-left: 6px; vertical-align: middle; }
 
+.tz-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
 .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-top: 14px; }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
 .dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }

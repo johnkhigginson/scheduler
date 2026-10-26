@@ -53,7 +53,8 @@ public sealed class Poll
     /// <summary>
     /// IANA zone the organizer was in when they created the poll, for example America/Denver.
     /// Option times are naive wall clock strings, so this is the only thing that says which wall
-    /// clock they refer to. Display only, never used to shift a date.
+    /// clock they refer to. Display only: the poll page uses it to show each voter the times on their
+    /// own clock. Nothing stored is ever shifted by it.
     /// </summary>
     public string? TimeZone { get; set; }
 

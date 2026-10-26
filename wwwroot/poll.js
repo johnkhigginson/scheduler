@@ -115,6 +115,70 @@
     return 'in ' + Math.round(hours / 24) + ' days';
   }
 
+  // ---------- time zones ----------
+  // Option times are wall clock strings in the organizer's zone. Voters see them on their own clock
+  // by default, with a switch back to the times as entered. All day options never move, because a
+  // date is the same date everywhere.
+
+  var HERE = null;
+  try { HERE = Intl.DateTimeFormat().resolvedOptions().timeZone || null; } catch (e) { /* older browser */ }
+
+  var showOrganizerZone = false;
+  var convertible = false;
+  // poll.options as they read on the clock being shown, sorted on that clock. A converted slot can
+  // cross midnight, so the stored order is not always the shown order. entered is the stored option.
+  var options = [];
+
+  function zoneLabel(zone) { return zone.replace(/_/g, ' '); }
+
+  /// Only worth offering when converting would change at least one time. Two zone names can share
+  /// every rule, and then a switch that changes nothing is just noise.
+  function canConvert() {
+    if (!HERE || !poll.timeZone || HERE === poll.timeZone || !Zones.valid(poll.timeZone)) return false;
+    return poll.options.some(function (o) {
+      if (!o.time) return false;
+      var at = Zones.convert(o.date, o.time, poll.timeZone, HERE);
+      return at.date !== o.date || at.time !== o.time;
+    });
+  }
+
+  /// The zone whose clock is on screen. Undefined means the device's own.
+  function shownZone() {
+    if (!convertible) return undefined;
+    return showOrganizerZone ? poll.timeZone : HERE;
+  }
+
+  function layout() {
+    convertible = canConvert();
+    var to = convertible && !showOrganizerZone ? HERE : null;
+    options = poll.options.map(function (o) {
+      var at = to && o.time ? Zones.convert(o.date, o.time, poll.timeZone, to) : o;
+      return { id: o.id, date: at.date, time: at.time, entered: o };
+    });
+    options.sort(function (a, b) {
+      var x = a.date + '|' + (a.time || ''), y = b.date + '|' + (b.time || '');
+      return x < y ? -1 : x > y ? 1 : 0;
+    });
+  }
+
+  /// An instant such as the deadline, on the clock being shown and without seconds.
+  function formatInstant(date) {
+    return date.toLocaleString(undefined, {
+      weekday: 'short', month: 'short', day: 'numeric', year: 'numeric',
+      hour: 'numeric', minute: '2-digit', timeZoneName: 'short', timeZone: shownZone()
+    });
+  }
+
+  document.getElementById('tz-toggle').addEventListener('click', function (e) {
+    var button = e.target.closest('[data-zone]');
+    if (!button) return;
+    showOrganizerZone = button.getAttribute('data-zone') === 'organizer';
+    // Weekdays and times in the bulk answer row are on the old clock, so they start over.
+    qf.days = 'all';
+    qf.time = 'any';
+    render();
+  });
+
   // ---------- calendar export ----------
 
   function icsEscape(text) {
@@ -147,16 +211,22 @@
       'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
 
     winners.forEach(function (row) {
-      var option = row.option;
+      var option = row.option.entered;
       var compact = option.date.replace(/-/g, '');
 
       lines.push('BEGIN:VEVENT');
       lines.push('UID:' + poll.publicId + '-' + option.id + '@scheduler');
       lines.push('DTSTAMP:' + now);
 
-      if (option.time) {
-        // Floating local time on purpose. The stored time is a naive wall clock in whatever zone
-        // the organizer was in, so pinning it to UTC would move the meeting for everybody else.
+      if (option.time && Zones.valid(poll.timeZone)) {
+        // The zone it was entered in is known, so the event is pinned to a real instant and every
+        // calendar shows it on its own clock.
+        var instant = Zones.instantOf(option.date, option.time, poll.timeZone);
+        lines.push('DTSTART:' + utcStamp(new Date(instant)));
+        lines.push('DTEND:' + utcStamp(new Date(instant + 3600000)));
+      } else if (option.time) {
+        // Floating local time on purpose. With no zone recorded the stored time is a naive wall
+        // clock, and pinning it to UTC would move the meeting for everybody else.
         var start = parseDate(option.date);
         var hm = option.time.split(':');
         start.setHours(+hm[0], +hm[1], 0, 0);
@@ -171,8 +241,7 @@
 
       lines.push('SUMMARY:' + icsEscape(poll.title));
       var description = 'Poll: ' + url +
-        (poll.organizerName ? '\nOrganized by ' + poll.organizerName : '') +
-        (poll.timeZone && option.time ? '\nTime as entered in ' + poll.timeZone : '');
+        (poll.organizerName ? '\nOrganized by ' + poll.organizerName : '');
       lines.push('DESCRIPTION:' + icsEscape(description));
       lines.push('URL:' + url);
       lines.push('END:VEVENT');
@@ -195,7 +264,7 @@
   // ---------- tallies ----------
 
   function tallies() {
-    return poll.options.map(function (option) {
+    return options.map(function (option) {
       var yes = 0, maybe = 0, no = 0;
       poll.participants.forEach(function (p) {
         var vote = p.votes[option.id];
@@ -219,6 +288,7 @@
   // ---------- render ----------
 
   function render() {
+    layout();
     document.getElementById('title').textContent = poll.title;
     document.title = poll.title + ' | ' + SITE_NAME;
 
@@ -264,10 +334,15 @@
     var list = document.getElementById('admin-options');
     list.textContent = '';
 
+    // The list follows the clock the grid shows, but anything added is stored in the poll's zone.
+    var zoneHint = document.getElementById('add-option-zone');
+    zoneHint.hidden = !convertible;
+    if (convertible) zoneHint.textContent = 'A time you add is in ' + zoneLabel(poll.timeZone) + '.';
+
     // Grouped by day. One row per option meant a poll built from time slots produced a list
     // hundreds of rows long here, for what is a rarely used panel.
     var groups = [];
-    poll.options.forEach(function (option) {
+    options.forEach(function (option) {
       var last = groups[groups.length - 1];
       if (last && last.date === option.date) last.options.push(option);
       else groups.push({ date: option.date, options: [option] });
@@ -354,32 +429,37 @@
   function renderNotes() {
     document.getElementById('legend-maybe').hidden = !maybeInPlay();
 
-    // Option times are naive wall clock strings. Saying which zone they were entered in is the
-    // honest fix. Converting them would be a guess, because no offset was ever recorded.
+    // Every time on the page follows this, so it always names the clock it is showing.
     var tzNote = document.getElementById('tz-note');
+    var tzText = document.getElementById('tz-text');
     var timed = poll.options.some(function (o) { return !!o.time; });
-    if (timed && poll.timeZone) {
-      var here = null;
-      try { here = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { /* older browser */ }
-      tzNote.textContent = 'Times are shown as the organizer entered them, in ' + poll.timeZone + '.' +
-        (here && here !== poll.timeZone ? ' Your device is in ' + here + ', so convert before you commit.' : '');
-      tzNote.hidden = false;
-    } else if (timed) {
+    tzNote.hidden = !timed;
+    document.getElementById('tz-toggle').hidden = !convertible;
+
+    if (convertible) {
+      tzText.textContent = showOrganizerZone
+        ? 'Times are shown as the organizer entered them, in ' + zoneLabel(poll.timeZone) + '.'
+        : 'Times are shown in your time zone, ' + zoneLabel(HERE) + '.';
+      document.querySelectorAll('#tz-toggle [data-zone]').forEach(function (button) {
+        var on = (button.getAttribute('data-zone') === 'organizer') === showOrganizerZone;
+        button.classList.toggle('on', on);
+        button.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    } else if (poll.timeZone) {
+      tzText.textContent = 'Times are in ' + zoneLabel(poll.timeZone) + '.';
+    } else {
       // Saying nothing here hid the ambiguity in exactly the case where it mattered most: times
       // exist, but nothing records which clock they belong to.
-      tzNote.textContent = 'Times are shown as the organizer entered them. Their timezone was not ' +
+      tzText.textContent = 'Times are shown as the organizer entered them. Their time zone was not ' +
         'recorded, so check with them if you are somewhere else.';
-      tzNote.hidden = false;
-    } else {
-      tzNote.hidden = true;
     }
 
     var deadlineNote = document.getElementById('deadline-note');
     if (poll.deadlineUtc) {
       var when = new Date(poll.deadlineUtc);
       deadlineNote.textContent = poll.closedByDeadline
-        ? 'Voting closed automatically on ' + when.toLocaleString() + '.'
-        : 'Voting closes ' + when.toLocaleString() + ', ' + relative(when) + '.';
+        ? 'Voting closed automatically on ' + formatInstant(when) + '.'
+        : 'Voting closes ' + formatInstant(when) + ', ' + relative(when) + '.';
       deadlineNote.hidden = false;
     } else {
       deadlineNote.hidden = true;
@@ -399,7 +479,7 @@
     // single day owns a dozen columns, and repeating the date above every one of them is what
     // made a wide grid unreadable.
     var groups = [];
-    poll.options.forEach(function (option) {
+    options.forEach(function (option) {
       var last = groups[groups.length - 1];
       if (last && last.date === option.date) last.options.push(option);
       else groups.push({ date: option.date, options: [option] });
@@ -430,7 +510,7 @@
     }
 
     head.appendChild(el('th', 'name-col', 'Participant'));
-    poll.options.forEach(function (option) {
+    options.forEach(function (option) {
       var date = parseDate(option.date);
       var th = el('th', (best[option.id] ? 'best' : '') + (dayStart[option.id] ? ' daystart' : ''));
       th.scope = 'col';
@@ -469,7 +549,7 @@
       }
       tr.appendChild(nameCell);
 
-      poll.options.forEach(function (option) {
+      options.forEach(function (option) {
         var vote = participant.votes[option.id] || null;
         var td = el('td', (best[option.id] ? 'best' : '') + (dayStart[option.id] ? ' daystart' : ''));
         var pill = el('span', 'pill ' + (vote || 'none'), vote ? MARK[vote] : '·');
@@ -587,13 +667,13 @@
 
   function pollWeekdays() {
     var seen = {};
-    poll.options.forEach(function (o) { seen[parseDate(o.date).getDay()] = true; });
+    options.forEach(function (o) { seen[parseDate(o.date).getDay()] = true; });
     return [1, 2, 3, 4, 5, 6, 0].filter(function (d) { return seen[d]; });
   }
 
   function pollTimes() {
     var seen = {};
-    poll.options.forEach(function (o) { if (o.time) seen[o.time] = true; });
+    options.forEach(function (o) { if (o.time) seen[o.time] = true; });
     return Object.keys(seen).sort();
   }
 
@@ -668,7 +748,7 @@
     var apply = el('button', 'primary qf-apply', 'Apply');
     apply.addEventListener('click', function () {
       if (!editing) return;
-      poll.options.forEach(function (option) {
+      options.forEach(function (option) {
         if (!qfMatches(option)) return;
         if (qf.answer === 'clear') delete editing.votes[option.id];
         else editing.votes[option.id] = qf.answer;
@@ -679,7 +759,7 @@
 
     box.appendChild(line);
 
-    var count = poll.options.filter(qfMatches).length;
+    var count = options.filter(qfMatches).length;
     box.appendChild(el('p', 'qf-count',
       count === poll.options.length
         ? 'Applies to all ' + count + ' options'
@@ -708,7 +788,7 @@
     // One card per day. At three hundred options the day boundary is the only thing keeping this
     // readable, so it is a card edge rather than a heading in the flow.
     var groups = [];
-    poll.options.forEach(function (option) {
+    options.forEach(function (option) {
       var last = groups[groups.length - 1];
       if (last && last.date === option.date) last.options.push(option);
       else groups.push({ date: option.date, options: [option] });

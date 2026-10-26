@@ -52,6 +52,14 @@
 
     <div id="deadline-note" class="notice info" hidden></div>
 
+    <div id="tz-note" class="tz-note" hidden>
+      <span id="tz-text"></span>
+      <div class="seg" id="tz-toggle" role="group" aria-label="Time zone for the times on this page" hidden>
+        <button type="button" class="seg-item" data-zone="here">Your time zone</button>
+        <button type="button" class="seg-item" data-zone="organizer">Organizer's time zone</button>
+      </div>
+    </div>
+
     <div id="winner" class="winner" hidden></div>
 
     <div class="card vote-editor" id="vote-editor" hidden>
@@ -85,8 +93,6 @@
       <span>The best scoring date is highlighted.</span>
     </div>
 
-    <p id="tz-note" class="muted" hidden></p>
-
     <div class="actions" id="grid-actions"></div>
 
     <div class="card" style="margin-top:24px">
@@ -115,6 +121,7 @@
         <input type="time" id="new-option-time" step="900" aria-label="Time for the new date">
         <button type="button" id="add-option">Add this date</button>
       </div>
+      <p class="muted" id="add-option-zone" hidden></p>
 
       <p class="muted" style="margin-bottom:0">You are signed in as the organizer on this device.</p>
     </div>
@@ -157,6 +164,7 @@
 </footer>
 
 <script src="/site.js"></script>
+<script src="/zones.js"></script>
 <script src="/poll.js"></script>
 <script src="/account.js"></script>
 </body>
