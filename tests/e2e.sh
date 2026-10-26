@@ -298,6 +298,7 @@ echo "== site pages, search and share tags =="
 ctype() { curl -s -o /dev/null -w '%{content_type}' --max-time 15 "$B$1" $IP7 | cut -d';' -f1; }
 is "privacy page loads" "$(code GET /privacy '' $IP7)" 200
 body GET /privacy '' $IP7 | grep -q 'Last updated' && ok "privacy page has a date" || bad "privacy page has a date" "missing"
+body GET /privacy '' $IP7 | grep -q 'deleted automatically after 30' && ok "privacy page states how long access logs last" || bad "privacy page states how long access logs last" "missing"
 is "terms page loads" "$(code GET /terms '' $IP7)" 200
 ROBOTS=$(body GET /robots.txt '' $IP7)
 echo "$ROBOTS" | grep -q '^Sitemap: https://scheduler.sdw.dev/sitemap.xml' && ok "robots names the sitemap" || bad "robots names the sitemap" "missing"

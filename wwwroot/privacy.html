@@ -114,13 +114,23 @@
   somewhere else.</p>
 
   <h2>IP addresses and logs</h2>
-  <p>To limit abuse, the server counts requests that change something (creating a poll, voting,
+  <p>The web server in front of Scheduler keeps a standard access log. Each entry records the time,
+  your IP address, the request method and path (including any query string), the response status
+  and size, and request headers such as your browser's user agent and the page that sent you, if
+  your browser includes it.</p>
+  <p>The log file is rotated when it reaches 10 MB. Rotated files are deleted automatically after 30
+  days, and at most 5 are kept. At current traffic, that means an entry is usually kept for anywhere
+  from a few weeks to roughly two months.</p>
+  <p>The part of a link after <code>#</code> is never sent to the server, so it never appears in the
+  log. That is where the organizer link keeps its secret. A sign in link carries its code in the
+  query string, so that code does appear. It works once and expires after 15 minutes.</p>
+  <p>To limit abuse, the server also counts requests that change something (creating a poll, voting,
   commenting, asking for a sign in link) per IP address. Those counts are kept in memory only, last
-  an hour at most, and are never written to the database. Scheduler runs no analytics and does not
-  build profiles of visitors. The server and the app may keep short-lived technical logs, such as
-  request errors, for troubleshooting. Those logs are not used for tracking. The error log can
-  include an email address when an email fails to send. That log stays on the server and is only
-  used to fix problems.</p>
+  an hour at most, and are never written to the database.</p>
+  <p>The app keeps its own error log for troubleshooting. It can include an email address when an
+  email fails to send. That log stays on the server and is only used to fix problems.</p>
+  <p>None of these logs are used for tracking. Scheduler runs no analytics and does not build
+  profiles of visitors.</p>
 
   <h2>Who can see what</h2>
   <ul>
